@@ -1,6 +1,6 @@
 <Solution>
   <Folder Name="/A..Domain/">
-    <Project Path="src/ClassLibrary1/ClassLibrary1.csproj" Id="86ef4e5e-4296-464b-b3fa-c78a69080c5c" />
+    <Project Path="src/ClassLibrary1/Domain.csproj" Id="86ef4e5e-4296-464b-b3fa-c78a69080c5c" />
   </Folder>
   <Folder Name="/B.Core/">
     <Project Path="src/Core/Core.csproj" Id="4854bdfb-a8ff-4d17-b9f0-1867180b0973" />
