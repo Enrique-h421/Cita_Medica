@@ -8,5 +8,6 @@ namespace Core
     {
         Task<IEnumerable<Cita>> ObtenerTodasLasCitasAsync();
         Task<Cita?> ObtenerCitaPorIdAsync(long id);
+        Task CrearCitaAsync(Cita cita); 
     }
 }

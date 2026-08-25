@@ -1,4 +1,8 @@
 ﻿using Core;
+using Core.Queries;
+using Core.Commands;
+using Domain.AgendaYAtencion;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -8,28 +12,30 @@ namespace Api.Controllers
     [Route("api/[controller]")]
     public class CitasController : ControllerBase
     {
-        private readonly ICitaRepository _citaRepository;
+        private readonly IMediator _mediator;
 
-        public CitasController(ICitaRepository citaRepository)
+      
+        public CitasController(IMediator mediator)
         {
-            _citaRepository = citaRepository;
+            _mediator = mediator;
         }
 
+       
         [HttpGet]
         public async Task<IActionResult> GetTodas()
         {
-            var citas = await _citaRepository.ObtenerTodasLasCitasAsync();
+            var citas = await _mediator.Send(new ObtenerCitasQuery());
             return Ok(citas);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetPorId(long id)
+        
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] Cita cita)
         {
-            var cita = await _citaRepository.ObtenerCitaPorIdAsync(id);
-            if (cita == null)
-                return NotFound($"No se encontró la cita con ID {id}");
-
-            return Ok(cita);
+            var resultado = await _mediator.Send(new CrearCitaCommand { NuevaCita = cita });
+            return Ok(resultado);
         }
+
+       
     }
 }

@@ -2,7 +2,7 @@ using Core;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 using Persistence.repositories;
-using System.Text.Json.Serialization; 
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +11,8 @@ builder.Services.AddDbContext<ClinicaDbContext>(options =>
 
 builder.Services.AddScoped<ICitaRepository, CitaRepository>();
 
+
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Core.Queries.ObtenerCitasHandler).Assembly));
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

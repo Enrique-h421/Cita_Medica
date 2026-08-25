@@ -28,5 +28,10 @@ namespace Persistence.repositories
                                  .Include(c => c.EstadoCita)
                                  .FirstOrDefaultAsync(c => c.CitaID == id);
         }
+
+        public Task CrearCitaAsync(Cita cita)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
