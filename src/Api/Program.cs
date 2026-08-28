@@ -2,7 +2,7 @@ using Core;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 using Persistence.repositories;
-using System.Text.Json.Serialization; 
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,7 +10,7 @@ builder.Services.AddDbContext<ClinicaDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ClinicaConnection")));
 
 builder.Services.AddScoped<ICitaRepository, CitaRepository>();
-
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
