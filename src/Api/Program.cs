@@ -1,6 +1,8 @@
 using Core;
+using Core.GenericRepository;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
+using Persistence.GenericRepository;
 using Persistence.repositories;
 using System.Text.Json.Serialization;
 
@@ -11,6 +13,8 @@ builder.Services.AddDbContext<ClinicaDbContext>(options =>
 
 builder.Services.AddScoped<ICitaRepository, CitaRepository>();
 
+// Repositorio Genérico
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Core.Queries.ObtenerCitasHandler).Assembly));
 
