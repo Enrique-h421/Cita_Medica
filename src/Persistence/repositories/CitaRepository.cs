@@ -29,9 +29,26 @@ namespace Persistence.repositories
                                  .FirstOrDefaultAsync(c => c.CitaID == id);
         }
 
-        public Task CrearCitaAsync(Cita cita)
+        public async Task CrearCitaAsync(Cita cita)
         {
-            throw new NotImplementedException();
+            await _context.Citas.AddAsync(cita);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task ActualizarCitaAsync(Cita cita)
+        {
+            _context.Citas.Update(cita);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task EliminarCitaAsync(long id)
+        {
+            var cita = await _context.Citas.FindAsync(id);
+            if (cita != null)
+            {
+                _context.Citas.Remove(cita);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }
