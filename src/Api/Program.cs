@@ -10,7 +10,7 @@ builder.Services.AddDbContext<ClinicaDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ClinicaConnection")));
 
 builder.Services.AddScoped<ICitaRepository, CitaRepository>();
-builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped(typeof(Core.GenericRepository.IGenericRepository<>), typeof(Persistence.GenericRepository.GenericRepository<>));
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
