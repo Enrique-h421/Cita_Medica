@@ -14,4 +14,7 @@
   <Folder Name="/E.Api/">
     <Project Path="src/Api/Api.csproj" Id="12ea3a99-610c-4182-9db1-9267ba4be13f" />
   </Folder>
+  <Folder Name="/F.GenericPersistence/">
+    <Project Path="src/GenericPersistence/GenericPersistence.csproj" Id="4b803143-a98d-4d34-9691-fe719528bf35" />
+  </Folder>
 </Solution>

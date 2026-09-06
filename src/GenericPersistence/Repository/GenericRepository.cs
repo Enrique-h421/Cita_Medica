@@ -1,16 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Core.GenericRepository;
 using Microsoft.EntityFrameworkCore;
 
-namespace Persistence.GenericRepository
+namespace GenericPersistence.Repository
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
-        private readonly ClinicaDbContext _context;
+        private readonly DbContext _context;
         private readonly DbSet<T> _dbSet;
 
-        public GenericRepository(ClinicaDbContext context)
+        public GenericRepository(DbContext context)
         {
             _context = context;
             _dbSet = context.Set<T>();
