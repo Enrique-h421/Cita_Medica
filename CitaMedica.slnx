@@ -1,17 +1,18 @@
 <Solution>
-  <Folder Name="/A..Domain/">
+  <Folder Name="/CitMedica/" />
+  <Folder Name="/CitMedica/A..Domain/">
     <Project Path="src/ClassLibrary1/Domain.csproj" Id="86ef4e5e-4296-464b-b3fa-c78a69080c5c" />
   </Folder>
-  <Folder Name="/B.Core/">
+  <Folder Name="/CitMedica/B.Core/">
     <Project Path="src/Core/Core.csproj" Id="4854bdfb-a8ff-4d17-b9f0-1867180b0973" />
   </Folder>
-  <Folder Name="/C.Persistence/">
+  <Folder Name="/CitMedica/C.Persistence/">
     <Project Path="src/Persistence/Persistence.csproj" Id="31a6c883-bbaf-4d33-9e58-2fb3c6a40c80" />
   </Folder>
-  <Folder Name="/D.Infrastructure/">
+  <Folder Name="/CitMedica/D.Infrastructure/">
     <Project Path="src/Infrastructure/Infrastructure.csproj" Id="5a06c7d5-bb41-43ef-b0c2-b5077ebf8f38" />
   </Folder>
-  <Folder Name="/E.Api/">
+  <Folder Name="/CitMedica/E.Api/">
     <Project Path="src/Api/Api.csproj" Id="12ea3a99-610c-4182-9db1-9267ba4be13f" />
   </Folder>
   <Folder Name="/F.GenericPersistence/">

@@ -1,4 +1,5 @@
 using Core;
+using GenericPersistence.Repository;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 using Persistence.repositories;
@@ -8,6 +9,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ClinicaDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ClinicaConnection")));
+
+builder.Services.AddScoped<DbContext>(sp => sp.GetRequiredService<ClinicaDbContext>());
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 builder.Services.AddScoped<ICitaRepository, CitaRepository>();
 

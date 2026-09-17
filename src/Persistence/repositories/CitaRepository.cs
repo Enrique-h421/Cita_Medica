@@ -1,5 +1,6 @@
 ﻿using Core;
 using Domain.AgendaYAtencion;
+using GenericPersistence.Repository;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -9,10 +10,12 @@ namespace Persistence.repositories
     public class CitaRepository : ICitaRepository
     {
         private readonly ClinicaDbContext _context;
+        private readonly IGenericRepository<Cita> _genericRepository;
 
-        public CitaRepository(ClinicaDbContext context)
+        public CitaRepository(ClinicaDbContext context, IGenericRepository<Cita> genericRepository)
         {
             _context = context;
+            _genericRepository = genericRepository;
         }
 
         public async Task<IEnumerable<Cita>> ObtenerTodasLasCitasAsync()
@@ -31,24 +34,17 @@ namespace Persistence.repositories
 
         public async Task CrearCitaAsync(Cita cita)
         {
-            await _context.Citas.AddAsync(cita);
-            await _context.SaveChangesAsync();
+            await _genericRepository.CrearAsync(cita);
         }
 
         public async Task ActualizarCitaAsync(Cita cita)
         {
-            _context.Citas.Update(cita);
-            await _context.SaveChangesAsync();
+            await _genericRepository.ActualizarAsync(cita);
         }
 
         public async Task EliminarCitaAsync(long id)
         {
-            var cita = await _context.Citas.FindAsync(id);
-            if (cita != null)
-            {
-                _context.Citas.Remove(cita);
-                await _context.SaveChangesAsync();
-            }
+            await _genericRepository.EliminarAsync(id);
         }
     }
 }
