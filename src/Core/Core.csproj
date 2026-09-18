@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ClassLibrary1\Domain.csproj" />
+    <ProjectReference Include="..\GenericPersistence\GenericPersistence.csproj" />
   </ItemGroup>
 
 </Project>

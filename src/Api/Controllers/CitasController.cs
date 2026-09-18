@@ -14,13 +14,11 @@ namespace Api.Controllers
     {
         private readonly IMediator _mediator;
 
-      
         public CitasController(IMediator mediator)
         {
             _mediator = mediator;
         }
 
-       
         [HttpGet]
         public async Task<IActionResult> GetTodas()
         {
@@ -28,14 +26,18 @@ namespace Api.Controllers
             return Ok(citas);
         }
 
-        
+        [HttpGet("paginado")]
+        public async Task<IActionResult> GetPaginado(int pageNumber = 1, int pageSize = 10)
+        {
+            var resultado = await _mediator.Send(new ObtenerCitasPaginadasQuery { PageNumber = pageNumber, PageSize = pageSize });
+            return Ok(resultado);
+        }
+
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Cita cita)
         {
             var resultado = await _mediator.Send(new CrearCitaCommand { NuevaCita = cita });
             return Ok(resultado);
         }
-
-       
     }
 }
