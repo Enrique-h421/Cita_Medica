@@ -27,9 +27,9 @@ namespace Api.Controllers
         }
 
         [HttpGet("paginado")]
-        public async Task<IActionResult> GetPaginado(int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> GetPaginado(int pageNumber = 1, int pageSize = 10, string? filter = null)
         {
-            var resultado = await _mediator.Send(new ObtenerCitasPaginadasQuery { PageNumber = pageNumber, PageSize = pageSize });
+            var resultado = await _mediator.Send(new ObtenerCitasPaginadasQuery { PageNumber = pageNumber, PageSize = pageSize, Filter = filter });
             return Ok(resultado);
         }
 

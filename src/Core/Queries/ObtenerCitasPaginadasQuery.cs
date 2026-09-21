@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Domain.AgendaYAtencion;
 using GenericPersistence.Repository;
+using GenericPersistence.FiltroDinamico;
 
 namespace Core.Queries
 {
@@ -10,6 +11,7 @@ namespace Core.Queries
     {
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 10;
+        public string? Filter { get; set; }
     }
 
     public class ObtenerCitasPaginadasHandler : IRequestHandler<ObtenerCitasPaginadasQuery, PagedResult<Cita>>
@@ -23,9 +25,14 @@ namespace Core.Queries
 
         public async Task<PagedResult<Cita>> Handle(ObtenerCitasPaginadasQuery request, CancellationToken cancellationToken)
         {
+            var filtro = !string.IsNullOrEmpty(request.Filter)
+                ? Filter.FromStringExpression<Cita>(request.Filter)
+                : null;
+
             return await _genericRepository.GetPagedAsync(
                 request.PageNumber,
                 request.PageSize,
+                filtro,
                 cancellationToken: cancellationToken);
         }
     }
