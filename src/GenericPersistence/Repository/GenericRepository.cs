@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -51,11 +52,25 @@ namespace GenericPersistence.Repository
             }
         }
 
+        public async Task<T?> GetOneByAsync(Expression<Func<T, bool>> filter)
+        {
+            if (filter == null) throw new ArgumentNullException(nameof(filter));
+            return await _dbSet.FirstOrDefaultAsync(filter);
+        }
+
+        public async Task CrearRangoAsync(IEnumerable<T> entidades)
+        {
+            if (entidades == null) throw new ArgumentNullException(nameof(entidades));
+            await _dbSet.AddRangeAsync(entidades);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<PagedResult<T>> GetPagedAsync(
             int pageNumber,
             int pageSize,
             Expression<Func<T, bool>>? filter = null,
             Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+            string? orderByField = null,
             bool asNoTracking = true,
             bool splitQuery = false,
             CancellationToken cancellationToken = default,
@@ -70,7 +85,15 @@ namespace GenericPersistence.Repository
 
             int totalRecords = await query.CountAsync(cancellationToken);
 
-            query = orderBy != null ? orderBy(query) : query;
+            if (!string.IsNullOrWhiteSpace(orderByField))
+            {
+                query = query.OrderBy(orderByField);
+            }
+            else if (orderBy != null)
+            {
+                query = orderBy(query);
+            }
+
             query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
 
             var data = await query.ToListAsync(cancellationToken);

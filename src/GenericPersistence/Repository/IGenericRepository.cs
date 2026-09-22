@@ -15,11 +15,16 @@ namespace GenericPersistence.Repository
         Task ActualizarAsync(T entidad);
         Task EliminarAsync(object id);
 
+        Task<T?> GetOneByAsync(Expression<Func<T, bool>> filter);
+
+        Task CrearRangoAsync(IEnumerable<T> entidades);
+
         Task<PagedResult<T>> GetPagedAsync(
             int pageNumber,
             int pageSize,
             Expression<Func<T, bool>>? filter = null,
             Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+            string? orderByField = null,
             bool asNoTracking = true,
             bool splitQuery = false,
             CancellationToken cancellationToken = default,
