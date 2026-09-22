@@ -12,19 +12,24 @@ builder.Services.AddDbContext<ClinicaDbContext>(options =>
 builder.Services.AddScoped<ICitaRepository, CitaRepository>();
 builder.Services.AddScoped(typeof(Core.GenericRepository.IGenericRepository<>), typeof(Persistence.GenericRepository.GenericRepository<>));
 
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Core.Citas.Queries.GetCitasQuery).Assembly));
+builder.Services.AddAutoMapper(cfg => { }, typeof(Core.Citas.Mappings.CitaProfile).Assembly);
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
 
-builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();

@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Persistence.repositories;
+using Core.GenericRepository;
 using Domain.AgendaYAtencion;
 
 namespace Api.Controllers
@@ -19,7 +19,7 @@ namespace Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var citas = await _repository.GetAllAsync();
+            var citas = await _repository.ObtenerTodosAsync();
             return Ok(citas);
         }
 
@@ -27,7 +27,7 @@ namespace Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(long id)
         {
-            var cita = await _repository.GetByIdAsync(id);
+            var cita = await _repository.ObtenerPorIdAsync(id);
             if (cita == null) return NotFound();
             return Ok(cita);
         }
@@ -36,8 +36,7 @@ namespace Api.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Cita cita)
         {
-            await _repository.AddAsync(cita);
-            await _repository.SaveChangesAsync();
+            await _repository.CrearAsync(cita);
             return Ok(cita);
         }
 
@@ -45,11 +44,10 @@ namespace Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(long id, [FromBody] Cita cita)
         {
-            var existente = await _repository.GetByIdAsync(id);
+            var existente = await _repository.ObtenerPorIdAsync(id);
             if (existente == null) return NotFound();
 
-            _repository.Update(cita);
-            await _repository.SaveChangesAsync();
+            await _repository.ActualizarAsync(cita);
             return Ok(cita);
         }
 
@@ -57,11 +55,10 @@ namespace Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(long id)
         {
-            var existente = await _repository.GetByIdAsync(id);
+            var existente = await _repository.ObtenerPorIdAsync(id);
             if (existente == null) return NotFound();
 
-            _repository.Delete(existente);
-            await _repository.SaveChangesAsync();
+            await _repository.EliminarAsync(id);
             return Ok();
         }
     }
