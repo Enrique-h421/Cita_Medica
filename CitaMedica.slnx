@@ -18,4 +18,8 @@
   <Folder Name="/F.GenericPersistence/">
     <Project Path="src/GenericPersistence/GenericPersistence.csproj" Id="4b803143-a98d-4d34-9691-fe719528bf35" />
   </Folder>
+  <Folder Name="/Rest/">
+    <Project Path="rst/NugetPackage_Rest/NugetPackage_Rest.csproj" Id="efdccc04-9abf-4b16-996e-b7764cf8f00a" />
+  </Folder>
+  <Project Path="rst/NugetPackage_Rest.Tests/NugetPackage_Rest.Tests.csproj" Id="55d4d9e6-c642-4d7d-a516-c795485c0bf4" />
 </Solution>
