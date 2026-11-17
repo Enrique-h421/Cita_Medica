@@ -20,7 +20,14 @@ namespace Core.Exceptions
         // Recursos propios de Agenda
         CONSULTORIO_NO_ENCONTRADO = 807,
         SUCURSAL_NO_ENCONTRADA = 808,
-        AREA_NO_ENCONTRADA = 809
+        AREA_NO_ENCONTRADA = 809,
+
+        // Atenciones y expediente clínico
+        ATENCION_NO_ENCONTRADA = 810,
+        ATENCION_INVALIDA = 811,
+        ATENCION_YA_CERRADA = 812,
+        ATENCION_YA_ANULADA = 813,
+        EXPEDIENTE_NO_ENCONTRADO = 814
     }
 
     /// <summary>Error de negocio con código propio; el middleware de la API lo

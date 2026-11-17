@@ -1,4 +1,5 @@
 using Domain.AgendaYAtencion;
+using Domain.Expedientes;
 using Domain.Organizacion;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,6 +21,8 @@ namespace Persistence
         public DbSet<Consultorio> Consultorios { get; set; }
         public DbSet<Sucursal> Sucursales { get; set; }
         public DbSet<Area> Areas { get; set; }
+        public DbSet<Atencion> Atenciones { get; set; }
+        public DbSet<ExpedienteClinico> Expedientes_Clinicos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -67,6 +70,40 @@ namespace Persistence
                 e.HasOne(x => x.Area)
                  .WithMany()
                  .HasForeignKey(x => x.AreaID);
+            });
+
+            // ---------------- Expedientes clínicos ----------------
+            modelBuilder.Entity<ExpedienteClinico>(e =>
+            {
+                e.ToTable("Expedientes_Clinicos");
+                e.HasKey(x => x.ExpedienteID);
+                e.Property(x => x.NumeroExpediente).HasColumnType("varchar(50)").IsRequired();
+
+                // En la base es date, no datetime2: sin esto EF manda la hora y
+                // SQL Server la trunca sin avisar.
+                e.Property(x => x.FechaApertura).HasColumnType("date");
+            });
+
+            // ---------------- Atenciones ----------------
+            modelBuilder.Entity<Atencion>(e =>
+            {
+                e.ToTable("Atenciones");
+                e.HasKey(x => x.AtencionID);
+                e.Property(x => x.MotivoConsulta).HasMaxLength(2000);
+                e.Property(x => x.Estado).HasColumnType("varchar(30)").IsRequired();
+
+                // EnfermedadActual, ExploracionFisica y Observaciones son
+                // nvarchar(max) en la base, que es justo lo que EF asume por
+                // defecto para un string sin largo declarado.
+
+                e.HasOne(x => x.Expediente)
+                 .WithMany(x => x.Atenciones)
+                 .HasForeignKey(x => x.ExpedienteID);
+
+                // Opcional: una urgencia se atiende sin cita previa.
+                e.HasOne(x => x.Cita)
+                 .WithMany()
+                 .HasForeignKey(x => x.CitaID);
             });
 
             // ---------------- Relaciones de Cita ----------------
