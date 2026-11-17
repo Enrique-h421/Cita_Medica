@@ -15,6 +15,19 @@
   <Folder Name="/CitMedica/E.Api/">
     <Project Path="src/Api/Api.csproj" Id="12ea3a99-610c-4182-9db1-9267ba4be13f" />
   </Folder>
+  <Folder Name="/Catalogos/" />
+  <Folder Name="/Catalogos/A.Domain/">
+    <Project Path="src/Catalogos/Catalogos.Domain/Catalogos.Domain.csproj" Id="9c1d4a72-5e38-4a61-8f0d-21b47c6e9a11" />
+  </Folder>
+  <Folder Name="/Catalogos/B.Core/">
+    <Project Path="src/Catalogos/Catalogos.Core/Catalogos.Core.csproj" Id="b3e86f14-7a52-4d90-9c33-6f8e21d05b48" />
+  </Folder>
+  <Folder Name="/Catalogos/C.Persistence/">
+    <Project Path="src/Catalogos/Catalogos.Persistence/Catalogos.Persistence.csproj" Id="d57a90c6-1b43-4e28-85f7-0c9ab34d7e62" />
+  </Folder>
+  <Folder Name="/Catalogos/D.Api/">
+    <Project Path="src/Catalogos/Catalogos.Api/Catalogos.Api.csproj" Id="e81c25b9-6d07-4f35-a1be-93f6c20a8d74" />
+  </Folder>
   <Folder Name="/F.GenericPersistence/">
     <Project Path="src/GenericPersistence/GenericPersistence.csproj" Id="4b803143-a98d-4d34-9691-fe719528bf35" />
   </Folder>

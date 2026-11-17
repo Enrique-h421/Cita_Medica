@@ -1,0 +1,16 @@
+<Project>
+
+  <!--
+    MSBuild lee este archivo automáticamente y aplica lo que contiene a TODOS los
+    proyectos que estén debajo de esta carpeta, sin tener que tocarlos uno por uno.
+
+    Las librerías de SQL Server arrastran System.Security.Cryptography.Pkcs 9.0.11,
+    que tiene dos vulnerabilidades conocidas (una alta, CVE-2026-84008, y una
+    moderada). La 9.0.21 es la versión parchada de esa línea. Al declararla aquí de
+    forma explícita, gana sobre la que venía arrastrada en todos los proyectos.
+  -->
+  <ItemGroup>
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="9.0.21" />
+  </ItemGroup>
+
+</Project>
