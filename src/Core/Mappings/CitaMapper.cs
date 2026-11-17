@@ -16,7 +16,11 @@ namespace Core.Mappings
             PacienteId = cita.PacienteID,
             MedicoId = cita.MedicoID,
             EspecialidadId = cita.EspecialidadID,
+
             ConsultorioId = cita.ConsultorioID,
+            ConsultorioNombre = cita.Consultorio is null
+                ? null
+                : ConsultorioMapper.Describir(cita.Consultorio),
 
             EstadoCitaId = cita.EstadoCitaID,
             EstadoCodigo = cita.EstadoCita?.Codigo,

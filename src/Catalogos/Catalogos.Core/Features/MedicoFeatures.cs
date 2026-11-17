@@ -1,6 +1,7 @@
 using Catalogos.Core.Dtos;
 using Catalogos.Core.Exceptions;
 using Catalogos.Core.Mappings;
+using Catalogos.Core.Repositories;
 using Catalogos.Domain.Entities;
 using GenericPersistence.FiltroDinamico;
 using GenericPersistence.Repository;
@@ -8,28 +9,80 @@ using MediatR;
 
 namespace Catalogos.Core.Features.Medicos
 {
+    /// <summary>
+    /// Resuelve las especialidades de los médicos desde la tabla puente.
+    /// Se hace en memoria, con una consulta a cada catálogo, porque el
+    /// repositorio genérico no soporta includes anidados. Para el tamaño de
+    /// estos catálogos es irrelevante y evita tocar la librería.
+    /// </summary>
+    internal static class EspecialidadesResolver
+    {
+        public static async Task EnriquecerAsync(
+            List<MedicoDto> medicos,
+            IMedicoEspecialidadRepository relaciones,
+            IGenericRepository<Especialidad> especialidades,
+            CancellationToken cancellationToken = default)
+        {
+            if (medicos.Count == 0) return;
+
+            var todasRelaciones = await relaciones.ObtenerTodasAsync(cancellationToken);
+
+            var todasEspecialidades = (await especialidades.ObtenerTodosAsync())
+                .GroupBy(e => e.EspecialidadID)
+                .ToDictionary(g => g.Key, g => g.First());
+
+            foreach (var medico in medicos)
+            {
+                var suyas = todasRelaciones.Where(r => r.MedicoID == medico.MedicoId).ToList();
+
+                medico.Especialidades = suyas
+                    .Where(r => todasEspecialidades.ContainsKey(r.EspecialidadID))
+                    .Select(r => todasEspecialidades[r.EspecialidadID].Nombre)
+                    .OrderBy(n => n)
+                    .ToList();
+
+                // La principal, o la primera que tenga si ninguna está marcada.
+                var principal = suyas.FirstOrDefault(r => r.Principal) ?? suyas.FirstOrDefault();
+
+                if (principal is not null
+                    && todasEspecialidades.TryGetValue(principal.EspecialidadID, out var esp))
+                {
+                    medico.EspecialidadPrincipalId = esp.EspecialidadID;
+                    medico.EspecialidadPrincipalNombre = esp.Nombre;
+                }
+            }
+        }
+    }
+
     // ======================= Queries =======================
 
     public class ObtenerMedicosQuery : IRequest<List<MedicoDto>> { }
 
     public class ObtenerMedicosHandler : IRequestHandler<ObtenerMedicosQuery, List<MedicoDto>>
     {
-        private const int TopeListado = 1000;
-
         private readonly IGenericRepository<Medico> _repo;
+        private readonly IMedicoEspecialidadRepository _relaciones;
+        private readonly IGenericRepository<Especialidad> _especialidades;
 
-        public ObtenerMedicosHandler(IGenericRepository<Medico> repo) => _repo = repo;
+        public ObtenerMedicosHandler(
+            IGenericRepository<Medico> repo,
+            IMedicoEspecialidadRepository relaciones,
+            IGenericRepository<Especialidad> especialidades)
+        {
+            _repo = repo;
+            _relaciones = relaciones;
+            _especialidades = especialidades;
+        }
 
         public async Task<List<MedicoDto>> Handle(
             ObtenerMedicosQuery request, CancellationToken cancellationToken)
         {
-            // Se usa la versión paginada porque es la que admite include: sin el
-            // include la especialidad vendría en null y el DTO saldría sin su nombre.
-            var pagina = await _repo.GetPagedAsync(
-                1, TopeListado, null, null, "Apellidos", true, false, cancellationToken,
-                m => m.Especialidad!);
+            var items = await _repo.ObtenerTodosAsync();
+            var dtos = items.OrderBy(x => x.Apellidos).ThenBy(x => x.Nombres).ToDtoList();
 
-            return pagina.Data.ToDtoList();
+            await EspecialidadesResolver.EnriquecerAsync(dtos, _relaciones, _especialidades, cancellationToken);
+
+            return dtos;
         }
     }
 
@@ -41,13 +94,16 @@ namespace Catalogos.Core.Features.Medicos
     public class ObtenerMedicoPorIdHandler : IRequestHandler<ObtenerMedicoPorIdQuery, MedicoDto>
     {
         private readonly IGenericRepository<Medico> _repo;
+        private readonly IMedicoEspecialidadRepository _relaciones;
         private readonly IGenericRepository<Especialidad> _especialidades;
 
         public ObtenerMedicoPorIdHandler(
             IGenericRepository<Medico> repo,
+            IMedicoEspecialidadRepository relaciones,
             IGenericRepository<Especialidad> especialidades)
         {
             _repo = repo;
+            _relaciones = relaciones;
             _especialidades = especialidades;
         }
 
@@ -63,15 +119,10 @@ namespace Catalogos.Core.Features.Medicos
                     $"No existe un médico con el Id {request.MedicoId}.");
             }
 
-            var dto = medico.ToDto();
+            var dtos = new List<MedicoDto> { medico.ToDto() };
+            await EspecialidadesResolver.EnriquecerAsync(dtos, _relaciones, _especialidades, cancellationToken);
 
-            if (medico.EspecialidadID.HasValue)
-            {
-                var especialidad = await _especialidades.ObtenerPorIdAsync(medico.EspecialidadID.Value);
-                dto.EspecialidadNombre = especialidad?.Nombre;
-            }
-
-            return dto;
+            return dtos[0];
         }
     }
 
@@ -87,8 +138,18 @@ namespace Catalogos.Core.Features.Medicos
         : IRequestHandler<ObtenerMedicosPaginadosQuery, PagedResult<MedicoDto>>
     {
         private readonly IGenericRepository<Medico> _repo;
+        private readonly IMedicoEspecialidadRepository _relaciones;
+        private readonly IGenericRepository<Especialidad> _especialidades;
 
-        public ObtenerMedicosPaginadosHandler(IGenericRepository<Medico> repo) => _repo = repo;
+        public ObtenerMedicosPaginadosHandler(
+            IGenericRepository<Medico> repo,
+            IMedicoEspecialidadRepository relaciones,
+            IGenericRepository<Especialidad> especialidades)
+        {
+            _repo = repo;
+            _relaciones = relaciones;
+            _especialidades = especialidades;
+        }
 
         public async Task<PagedResult<MedicoDto>> Handle(
             ObtenerMedicosPaginadosQuery request, CancellationToken cancellationToken)
@@ -100,12 +161,14 @@ namespace Catalogos.Core.Features.Medicos
             var orden = string.IsNullOrWhiteSpace(request.OrderBy) ? "Apellidos" : request.OrderBy;
 
             var pagina = await _repo.GetPagedAsync(
-                request.PageNumber, request.PageSize, filtro, null, orden, true, false, cancellationToken,
-                m => m.Especialidad!);
+                request.PageNumber, request.PageSize, filtro, null, orden, true, false, cancellationToken);
+
+            var dtos = pagina.Data.ToDtoList();
+            await EspecialidadesResolver.EnriquecerAsync(dtos, _relaciones, _especialidades, cancellationToken);
 
             return new PagedResult<MedicoDto>
             {
-                Data = pagina.Data.ToDtoList(),
+                Data = dtos,
                 TotalRecords = pagina.TotalRecords,
                 PageSize = pagina.PageSize,
                 CurrentPage = pagina.CurrentPage
@@ -123,13 +186,16 @@ namespace Catalogos.Core.Features.Medicos
     public class CrearMedicoHandler : IRequestHandler<CrearMedicoCommand, MedicoDto>
     {
         private readonly IGenericRepository<Medico> _repo;
+        private readonly IMedicoEspecialidadRepository _relaciones;
         private readonly IGenericRepository<Especialidad> _especialidades;
 
         public CrearMedicoHandler(
             IGenericRepository<Medico> repo,
+            IMedicoEspecialidadRepository relaciones,
             IGenericRepository<Especialidad> especialidades)
         {
             _repo = repo;
+            _relaciones = relaciones;
             _especialidades = especialidades;
         }
 
@@ -138,31 +204,35 @@ namespace Catalogos.Core.Features.Medicos
         {
             var datos = request.Medico;
 
-            // No se acepta una especialidad que no exista.
-            if (datos.EspecialidadId.HasValue)
-            {
-                var existe = await _especialidades.ObtenerPorIdAsync(datos.EspecialidadId.Value);
-
-                if (existe is null)
-                {
-                    throw new DomainException(
-                        Errores.ESPECIALIDAD_NO_ENCONTRADA,
-                        $"No existe una especialidad con el Id {datos.EspecialidadId.Value}.");
-                }
-            }
+            await ValidarEspecialidadesAsync(datos.EspecialidadesIds, _especialidades);
 
             var entidad = datos.ToEntity();
             await _repo.CrearAsync(entidad);
 
-            var dto = entidad.ToDto();
-
-            if (entidad.EspecialidadID.HasValue)
+            if (datos.EspecialidadesIds.Count > 0)
             {
-                var especialidad = await _especialidades.ObtenerPorIdAsync(entidad.EspecialidadID.Value);
-                dto.EspecialidadNombre = especialidad?.Nombre;
+                await _relaciones.AsignarAsync(
+                    entidad.MedicoID, datos.EspecialidadesIds, datos.EspecialidadPrincipalId, cancellationToken);
             }
 
-            return dto;
+            var dtos = new List<MedicoDto> { entidad.ToDto() };
+            await EspecialidadesResolver.EnriquecerAsync(dtos, _relaciones, _especialidades, cancellationToken);
+
+            return dtos[0];
+        }
+
+        internal static async Task ValidarEspecialidadesAsync(
+            IEnumerable<int> ids, IGenericRepository<Especialidad> especialidades)
+        {
+            foreach (var id in ids.Distinct())
+            {
+                if (await especialidades.ObtenerPorIdAsync(id) is null)
+                {
+                    throw new DomainException(
+                        Errores.ESPECIALIDAD_NO_ENCONTRADA,
+                        $"No existe una especialidad con el Id {id}.");
+                }
+            }
         }
     }
 
@@ -175,13 +245,16 @@ namespace Catalogos.Core.Features.Medicos
     public class ActualizarMedicoHandler : IRequestHandler<ActualizarMedicoCommand, bool>
     {
         private readonly IGenericRepository<Medico> _repo;
+        private readonly IMedicoEspecialidadRepository _relaciones;
         private readonly IGenericRepository<Especialidad> _especialidades;
 
         public ActualizarMedicoHandler(
             IGenericRepository<Medico> repo,
+            IMedicoEspecialidadRepository relaciones,
             IGenericRepository<Especialidad> especialidades)
         {
             _repo = repo;
+            _relaciones = relaciones;
             _especialidades = especialidades;
         }
 
@@ -197,20 +270,16 @@ namespace Catalogos.Core.Features.Medicos
                     $"No existe un médico con el Id {request.MedicoId}.");
             }
 
-            if (request.Medico.EspecialidadId.HasValue)
-            {
-                var existe = await _especialidades.ObtenerPorIdAsync(request.Medico.EspecialidadId.Value);
+            var datos = request.Medico;
 
-                if (existe is null)
-                {
-                    throw new DomainException(
-                        Errores.ESPECIALIDAD_NO_ENCONTRADA,
-                        $"No existe una especialidad con el Id {request.Medico.EspecialidadId.Value}.");
-                }
-            }
+            await CrearMedicoHandler.ValidarEspecialidadesAsync(datos.EspecialidadesIds, _especialidades);
 
-            request.Medico.AplicarCambios(entidad);
+            datos.AplicarCambios(entidad);
             await _repo.ActualizarAsync(entidad);
+
+            await _relaciones.AsignarAsync(
+                request.MedicoId, datos.EspecialidadesIds, datos.EspecialidadPrincipalId, cancellationToken);
+
             return true;
         }
     }
@@ -223,8 +292,15 @@ namespace Catalogos.Core.Features.Medicos
     public class EliminarMedicoHandler : IRequestHandler<EliminarMedicoCommand, bool>
     {
         private readonly IGenericRepository<Medico> _repo;
+        private readonly IMedicoEspecialidadRepository _relaciones;
 
-        public EliminarMedicoHandler(IGenericRepository<Medico> repo) => _repo = repo;
+        public EliminarMedicoHandler(
+            IGenericRepository<Medico> repo,
+            IMedicoEspecialidadRepository relaciones)
+        {
+            _repo = repo;
+            _relaciones = relaciones;
+        }
 
         public async Task<bool> Handle(
             EliminarMedicoCommand request, CancellationToken cancellationToken)
@@ -237,6 +313,9 @@ namespace Catalogos.Core.Features.Medicos
                     Errores.MEDICO_NO_ENCONTRADO,
                     $"No existe un médico con el Id {request.MedicoId}.");
             }
+
+            // Primero las filas de la tabla puente, si no la FK lo impide.
+            await _relaciones.EliminarPorMedicoAsync(request.MedicoId, cancellationToken);
 
             await _repo.EliminarAsync(request.MedicoId);
             return true;

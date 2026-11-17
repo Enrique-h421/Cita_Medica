@@ -1,6 +1,8 @@
 using Catalogos.Api.Middleware;
 using Catalogos.Core;
+using Catalogos.Core.Repositories;
 using Catalogos.Persistence;
+using Catalogos.Persistence.Repositories;
 using GenericPersistence.Repository;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -15,14 +17,17 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 builder.Host.UseSerilog();
 
-// ---------------- Base de datos y repositorio genérico ----------------
+// ---------------- Base de datos y repositorios ----------------
 builder.Services.AddDbContext<CatalogosDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("CatalogosConnection")));
 
-// Se reutiliza la misma librería de persistencia genérica del otro microservicio:
-// Catálogos no escribe ni un repositorio propio.
+// Se reutiliza la misma librería de persistencia genérica del otro microservicio.
 builder.Services.AddScoped<DbContext>(sp => sp.GetRequiredService<CatalogosDbContext>());
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
+// Medico_Especialidad tiene llave compuesta, que el repositorio genérico no
+// maneja: esa tabla lleva su propio repositorio específico.
+builder.Services.AddScoped<IMedicoEspecialidadRepository, MedicoEspecialidadRepository>();
 
 // ---------------- CORS para el frontend de Angular ----------------
 const string CorsAngular = "CorsAngular";

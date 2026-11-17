@@ -2,6 +2,8 @@ using Core.Dtos;
 using Core.Exceptions;
 using Core.Mappings;
 using Core.Services;
+using Domain.AgendaYAtencion;
+using GenericPersistence.Repository;
 using MediatR;
 
 namespace Core.Commands
@@ -17,11 +19,16 @@ namespace Core.Commands
     {
         private readonly ICitaRepository _repository;
         private readonly ICatalogosService _catalogos;
+        private readonly IGenericRepository<Consultorio> _consultorios;
 
-        public ActualizarCitaHandler(ICitaRepository repository, ICatalogosService catalogos)
+        public ActualizarCitaHandler(
+            ICitaRepository repository,
+            ICatalogosService catalogos,
+            IGenericRepository<Consultorio> consultorios)
         {
             _repository = repository;
             _catalogos = catalogos;
+            _consultorios = consultorios;
         }
 
         public async Task<bool> Handle(ActualizarCitaCommand request, CancellationToken cancellationToken)
@@ -75,6 +82,18 @@ namespace Core.Commands
                     throw new DomainException(
                         Errores.ESPECIALIDAD_NO_ENCONTRADA,
                         $"No existe una especialidad con el Id {datos.EspecialidadId.Value} en el catálogo.");
+                }
+            }
+
+            if (datos.ConsultorioId.HasValue)
+            {
+                var consultorio = await _consultorios.ObtenerPorIdAsync(datos.ConsultorioId.Value);
+
+                if (consultorio is null)
+                {
+                    throw new DomainException(
+                        Errores.CONSULTORIO_NO_ENCONTRADO,
+                        $"No existe un consultorio con el Id {datos.ConsultorioId.Value}.");
                 }
             }
 

@@ -52,8 +52,8 @@ namespace Core.Queries
                 ? OrdenPorDefecto
                 : request.OrderBy;
 
-            // El último argumento es el include: sin él EstadoCita viene en null
-            // y el DTO saldría sin el nombre del estado.
+            // Los dos últimos argumentos son los includes: sin ellos EstadoCita y
+            // Consultorio vendrían en null y el DTO saldría sin esos nombres.
             var pagina = await _genericRepository.GetPagedAsync(
                 request.PageNumber,
                 request.PageSize,
@@ -63,7 +63,8 @@ namespace Core.Queries
                 true,
                 false,
                 cancellationToken,
-                c => c.EstadoCita!);
+                c => c.EstadoCita!,
+                c => c.Consultorio!);
 
             var dtos = pagina.Data.ToDtoList();
 

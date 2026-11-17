@@ -1,10 +1,11 @@
 namespace Catalogos.Domain.Entities
 {
-    /// <summary>Especialidad médica a la que pertenece un médico y a la que
-    /// se puede dirigir una cita.</summary>
+    /// <summary>Mapea dbo.Especialidades del esquema entregado.</summary>
     public class Especialidad
     {
         public int EspecialidadID { get; set; }
+
+        public string Codigo { get; set; } = string.Empty;
 
         public string Nombre { get; set; } = string.Empty;
 
@@ -12,6 +13,6 @@ namespace Catalogos.Domain.Entities
 
         public bool Activo { get; set; } = true;
 
-        public ICollection<Medico> Medicos { get; set; } = new List<Medico>();
+        public ICollection<MedicoEspecialidad> Medicos { get; set; } = new List<MedicoEspecialidad>();
     }
 }

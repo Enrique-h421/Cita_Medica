@@ -15,7 +15,12 @@ namespace Core.Exceptions
         PACIENTE_NO_ENCONTRADO = 803,
         MEDICO_NO_ENCONTRADO = 804,
         ESPECIALIDAD_NO_ENCONTRADA = 805,
-        CATALOGOS_NO_DISPONIBLE = 806
+        CATALOGOS_NO_DISPONIBLE = 806,
+
+        // Recursos propios de Agenda
+        CONSULTORIO_NO_ENCONTRADO = 807,
+        SUCURSAL_NO_ENCONTRADA = 808,
+        AREA_NO_ENCONTRADA = 809
     }
 
     /// <summary>Error de negocio con código propio; el middleware de la API lo

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -19,7 +19,14 @@ namespace Domain.AgendaYAtencion
         public int? UsuarioCreacionID { get; set; }
         public DateTime FechaCreacion { get; set; }
 
-        
+
         public EstadoCita? EstadoCita { get; set; }
+
+        /// <summary>
+        /// Consultorio asignado. PacienteID, MedicoID y EspecialidadID no tienen
+        /// navegación porque viven en otro microservicio; éste sí, porque la tabla
+        /// Consultorios está en la misma base que las citas.
+        /// </summary>
+        public Consultorio? Consultorio { get; set; }
     }
 }

@@ -5,9 +5,9 @@ namespace Core.Dtos
     /// como código y nombre, no como el objeto EstadoCita completo, para que la
     /// respuesta no arrastre de vuelta todas las demás citas de ese estado.
     ///
-    /// Los campos de nombre (paciente, médico, especialidad) no viven en la base
-    /// de Agenda: se resuelven consultando el microservicio de Catálogos. Si ese
-    /// servicio no responde llegan en null y la cita se muestra igual.
+    /// El nombre del consultorio sale de la propia base de Agenda. Los de paciente,
+    /// médico y especialidad no: se resuelven consultando el microservicio de
+    /// Catálogos. Si ese servicio no responde llegan en null y la cita se muestra igual.
     /// </summary>
     public class CitaDto
     {
@@ -23,6 +23,7 @@ namespace Core.Dtos
         public string? EspecialidadNombre { get; set; }
 
         public int? ConsultorioId { get; set; }
+        public string? ConsultorioNombre { get; set; }
 
         public int EstadoCitaId { get; set; }
         public string? EstadoCodigo { get; set; }

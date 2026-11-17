@@ -2,6 +2,8 @@ using Core.Dtos;
 using Core.Exceptions;
 using Core.Mappings;
 using Core.Services;
+using Domain.AgendaYAtencion;
+using GenericPersistence.Repository;
 using MediatR;
 
 namespace Core.Commands
@@ -16,11 +18,16 @@ namespace Core.Commands
     {
         private readonly ICitaRepository _repository;
         private readonly ICatalogosService _catalogos;
+        private readonly IGenericRepository<Consultorio> _consultorios;
 
-        public CrearCitaHandler(ICitaRepository repository, ICatalogosService catalogos)
+        public CrearCitaHandler(
+            ICitaRepository repository,
+            ICatalogosService catalogos,
+            IGenericRepository<Consultorio> consultorios)
         {
             _repository = repository;
             _catalogos = catalogos;
+            _consultorios = consultorios;
         }
 
         public async Task<CitaDto> Handle(CrearCitaCommand request, CancellationToken cancellationToken)
@@ -67,10 +74,23 @@ namespace Core.Commands
                 }
             }
 
+            // El consultorio sí vive en esta base, así que se valida localmente.
+            if (datos.ConsultorioId.HasValue)
+            {
+                var consultorio = await _consultorios.ObtenerPorIdAsync(datos.ConsultorioId.Value);
+
+                if (consultorio is null)
+                {
+                    throw new DomainException(
+                        Errores.CONSULTORIO_NO_ENCONTRADO,
+                        $"No existe un consultorio con el Id {datos.ConsultorioId.Value}.");
+                }
+            }
+
             var cita = datos.ToEntity();
             await _repository.CrearCitaAsync(cita);
 
-            // Se vuelve a leer para traer el EstadoCita y devolver el nombre del estado.
+            // Se vuelve a leer para traer EstadoCita y Consultorio con sus nombres.
             var guardada = await _repository.ObtenerCitaPorIdAsync(cita.CitaID);
             var dto = guardada is not null ? guardada.ToDto() : cita.ToDto();
 

@@ -1,4 +1,4 @@
-﻿using Core;
+using Core;
 using Domain.AgendaYAtencion;
 using GenericPersistence.Repository;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +22,7 @@ namespace Persistence.repositories
         {
             return await _context.Citas
                                  .Include(c => c.EstadoCita)
+                                 .Include(c => c.Consultorio)
                                  .ToListAsync();
         }
 
@@ -29,6 +30,7 @@ namespace Persistence.repositories
         {
             return await _context.Citas
                                  .Include(c => c.EstadoCita)
+                                 .Include(c => c.Consultorio)
                                  .FirstOrDefaultAsync(c => c.CitaID == id);
         }
 

@@ -108,7 +108,7 @@ namespace Catalogos.Core.Features.Pacientes
         {
             var datos = request.Paciente;
 
-            if (datos.FechaNacimiento.HasValue && datos.FechaNacimiento.Value.Date > DateTime.Today)
+            if (datos.FechaNacimiento.Date > DateTime.Today)
             {
                 throw new DomainException(
                     Errores.DATOS_INVALIDOS,
@@ -137,8 +137,7 @@ namespace Catalogos.Core.Features.Pacientes
         public async Task<bool> Handle(
             ActualizarPacienteCommand request, CancellationToken cancellationToken)
         {
-            if (request.Paciente.FechaNacimiento.HasValue
-                && request.Paciente.FechaNacimiento.Value.Date > DateTime.Today)
+            if (request.Paciente.FechaNacimiento.Date > DateTime.Today)
             {
                 throw new DomainException(
                     Errores.DATOS_INVALIDOS,
