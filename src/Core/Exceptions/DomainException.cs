@@ -9,7 +9,13 @@ namespace Core.Exceptions
 
         // Agenda y atención
         CITA_NO_ENCONTRADA = 801,
-        CITA_INVALIDA = 802
+        CITA_INVALIDA = 802,
+
+        // Datos que viven en el microservicio de Catálogos
+        PACIENTE_NO_ENCONTRADO = 803,
+        MEDICO_NO_ENCONTRADO = 804,
+        ESPECIALIDAD_NO_ENCONTRADA = 805,
+        CATALOGOS_NO_DISPONIBLE = 806
     }
 
     /// <summary>Error de negocio con código propio; el middleware de la API lo

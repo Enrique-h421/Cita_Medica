@@ -1,5 +1,6 @@
 using Core.Dtos;
 using Core.Mappings;
+using Core.Services;
 using Domain.AgendaYAtencion;
 using GenericPersistence.FiltroDinamico;
 using GenericPersistence.Repository;
@@ -29,10 +30,14 @@ namespace Core.Queries
         private const string OrdenPorDefecto = "FechaHoraInicio descending";
 
         private readonly IGenericRepository<Cita> _genericRepository;
+        private readonly ICatalogosService _catalogos;
 
-        public ObtenerCitasPaginadasHandler(IGenericRepository<Cita> genericRepository)
+        public ObtenerCitasPaginadasHandler(
+            IGenericRepository<Cita> genericRepository,
+            ICatalogosService catalogos)
         {
             _genericRepository = genericRepository;
+            _catalogos = catalogos;
         }
 
         public async Task<PagedResult<CitaDto>> Handle(
@@ -60,9 +65,13 @@ namespace Core.Queries
                 cancellationToken,
                 c => c.EstadoCita!);
 
+            var dtos = pagina.Data.ToDtoList();
+
+            await dtos.EnriquecerAsync(_catalogos, cancellationToken);
+
             return new PagedResult<CitaDto>
             {
-                Data = pagina.Data.ToDtoList(),
+                Data = dtos,
                 TotalRecords = pagina.TotalRecords,
                 PageSize = pagina.PageSize,
                 CurrentPage = pagina.CurrentPage

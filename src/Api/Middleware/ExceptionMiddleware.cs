@@ -44,11 +44,15 @@ namespace Api.Middleware
         }
 
         /// <summary>
-        /// Un "no encontrado" es 404; el resto de errores de negocio son 400.
+        /// Un "no encontrado" es 404. Que otro microservicio esté caído es 503:
+        /// no es culpa de quien hizo la petición y además se puede reintentar.
+        /// El resto de errores de negocio son 400.
         /// </summary>
         private static HttpStatusCode EstadoHttpPara(Errores codigo) => codigo switch
         {
             Errores.CITA_NO_ENCONTRADA => HttpStatusCode.NotFound,
+            Errores.CATALOGOS_NO_DISPONIBLE => HttpStatusCode.ServiceUnavailable,
+            Errores.PASARELA_NO_DISPONIBLE => HttpStatusCode.ServiceUnavailable,
             _ => HttpStatusCode.BadRequest
         };
 
