@@ -7,8 +7,8 @@ namespace Api.Middleware
 {
     /// <summary>
     /// Captura las excepciones que suben desde los handlers y las traduce al sobre
-    /// estándar HttpResponse. Una DomainException sale como 400 con su código del
-    /// enum Errores; cualquier otra excepción sale como 500 sin filtrar detalles.
+    /// estándar HttpResponse. Una DomainException sale con su código del enum
+    /// Errores; cualquier otra excepción sale como 500 sin filtrar detalles.
     /// </summary>
     public class ExceptionMiddleware
     {
@@ -30,7 +30,7 @@ namespace Api.Middleware
             catch (DomainException ex)
             {
                 _logger.LogWarning(ex, "Error de negocio {Codigo} en {Ruta}", ex.Codigo, context.Request.Path);
-                await EscribirRespuestaAsync(context, HttpStatusCode.BadRequest, (int)ex.Codigo, ex.Message);
+                await EscribirRespuestaAsync(context, EstadoHttpPara(ex.Codigo), (int)ex.Codigo, ex.Message);
             }
             catch (Exception ex)
             {
@@ -42,6 +42,15 @@ namespace Api.Middleware
                     "Ocurrió un error inesperado en el servidor.");
             }
         }
+
+        /// <summary>
+        /// Un "no encontrado" es 404; el resto de errores de negocio son 400.
+        /// </summary>
+        private static HttpStatusCode EstadoHttpPara(Errores codigo) => codigo switch
+        {
+            Errores.CITA_NO_ENCONTRADA => HttpStatusCode.NotFound,
+            _ => HttpStatusCode.BadRequest
+        };
 
         private static async Task EscribirRespuestaAsync(
             HttpContext context,

@@ -1,17 +1,15 @@
-﻿using MediatR;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Domain.AgendaYAtencion; 
+using Core.Dtos;
+using Core.Mappings;
+using MediatR;
 
 namespace Core.Queries
 {
-    public class ObtenerCitasQuery : IRequest<List<Cita>>
+    /// <summary>Devuelve todas las citas, ya aplanadas a DTO.</summary>
+    public class ObtenerCitasQuery : IRequest<List<CitaDto>>
     {
     }
 
-    public class ObtenerCitasHandler : IRequestHandler<ObtenerCitasQuery, List<Cita>>
+    public class ObtenerCitasHandler : IRequestHandler<ObtenerCitasQuery, List<CitaDto>>
     {
         private readonly ICitaRepository _repository;
 
@@ -20,11 +18,10 @@ namespace Core.Queries
             _repository = repository;
         }
 
-        public async Task<List<Cita>> Handle(ObtenerCitasQuery request, CancellationToken cancellationToken)
+        public async Task<List<CitaDto>> Handle(ObtenerCitasQuery request, CancellationToken cancellationToken)
         {
-           
             var citas = await _repository.ObtenerTodasLasCitasAsync();
-            return citas.ToList();
+            return citas.ToDtoList();
         }
     }
 }

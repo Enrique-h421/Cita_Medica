@@ -1,17 +1,17 @@
-﻿using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
-using Domain.AgendaYAtencion;
+using Core.Dtos;
+using Core.Exceptions;
+using Core.Mappings;
+using MediatR;
 
 namespace Core.Commands
 {
-  
-    public class CrearCitaCommand : IRequest<bool>
+    /// <summary>Crea una cita y devuelve cómo quedó guardada.</summary>
+    public class CrearCitaCommand : IRequest<CitaDto>
     {
-        public Cita NuevaCita { get; set; }
+        public CrearCitaDto Cita { get; set; } = new CrearCitaDto();
     }
 
-    public class CrearCitaHandler : IRequestHandler<CrearCitaCommand, bool>
+    public class CrearCitaHandler : IRequestHandler<CrearCitaCommand, CitaDto>
     {
         private readonly ICitaRepository _repository;
 
@@ -20,10 +20,24 @@ namespace Core.Commands
             _repository = repository;
         }
 
-        public async Task<bool> Handle(CrearCitaCommand request, CancellationToken cancellationToken)
+        public async Task<CitaDto> Handle(CrearCitaCommand request, CancellationToken cancellationToken)
         {
-            await _repository.CrearCitaAsync(request.NuevaCita);
-            return true; 
+            var datos = request.Cita;
+
+            if (datos.FechaHoraFin.HasValue && datos.FechaHoraFin <= datos.FechaHoraInicio)
+            {
+                throw new DomainException(
+                    Errores.CITA_INVALIDA,
+                    "La hora de fin debe ser posterior a la hora de inicio.");
+            }
+
+            var cita = datos.ToEntity();
+            await _repository.CrearCitaAsync(cita);
+
+            // Se vuelve a leer para traer el EstadoCita y devolver el nombre del estado.
+            var guardada = await _repository.ObtenerCitaPorIdAsync(cita.CitaID);
+
+            return guardada is not null ? guardada.ToDto() : cita.ToDto();
         }
     }
 }

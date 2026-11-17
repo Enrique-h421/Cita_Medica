@@ -1,21 +1,33 @@
-﻿using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
+using Core.Dtos;
+using Core.Mappings;
 using Domain.AgendaYAtencion;
-using GenericPersistence.Repository;
 using GenericPersistence.FiltroDinamico;
+using GenericPersistence.Repository;
+using MediatR;
 
 namespace Core.Queries
 {
-    public class ObtenerCitasPaginadasQuery : IRequest<PagedResult<Cita>>
+    /// <summary>
+    /// Página de citas, con filtro dinámico opcional y orden configurable.
+    /// Usa el repositorio genérico, no el específico.
+    /// </summary>
+    public class ObtenerCitasPaginadasQuery : IRequest<PagedResult<CitaDto>>
     {
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 10;
+
+        /// <summary>Expresión dinámica, por ejemplo: EstadoCitaID == 1</summary>
         public string? Filter { get; set; }
+
+        /// <summary>Campo y sentido, por ejemplo: FechaHoraInicio descending</summary>
+        public string? OrderBy { get; set; }
     }
 
-    public class ObtenerCitasPaginadasHandler : IRequestHandler<ObtenerCitasPaginadasQuery, PagedResult<Cita>>
+    public class ObtenerCitasPaginadasHandler
+        : IRequestHandler<ObtenerCitasPaginadasQuery, PagedResult<CitaDto>>
     {
+        private const string OrdenPorDefecto = "FechaHoraInicio descending";
+
         private readonly IGenericRepository<Cita> _genericRepository;
 
         public ObtenerCitasPaginadasHandler(IGenericRepository<Cita> genericRepository)
@@ -23,17 +35,38 @@ namespace Core.Queries
             _genericRepository = genericRepository;
         }
 
-        public async Task<PagedResult<Cita>> Handle(ObtenerCitasPaginadasQuery request, CancellationToken cancellationToken)
+        public async Task<PagedResult<CitaDto>> Handle(
+            ObtenerCitasPaginadasQuery request,
+            CancellationToken cancellationToken)
         {
-            var filtro = !string.IsNullOrEmpty(request.Filter)
+            var filtro = !string.IsNullOrWhiteSpace(request.Filter)
                 ? Filter.FromStringExpression<Cita>(request.Filter)
                 : null;
 
-            return await _genericRepository.GetPagedAsync(
+            var orden = string.IsNullOrWhiteSpace(request.OrderBy)
+                ? OrdenPorDefecto
+                : request.OrderBy;
+
+            // El último argumento es el include: sin él EstadoCita viene en null
+            // y el DTO saldría sin el nombre del estado.
+            var pagina = await _genericRepository.GetPagedAsync(
                 request.PageNumber,
                 request.PageSize,
                 filtro,
-                cancellationToken: cancellationToken);
+                null,
+                orden,
+                true,
+                false,
+                cancellationToken,
+                c => c.EstadoCita!);
+
+            return new PagedResult<CitaDto>
+            {
+                Data = pagina.Data.ToDtoList(),
+                TotalRecords = pagina.TotalRecords,
+                PageSize = pagina.PageSize,
+                CurrentPage = pagina.CurrentPage
+            };
         }
     }
 }
