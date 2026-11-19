@@ -1,0 +1,43 @@
+<main class="pantalla">
+  <section class="tarjeta" aria-labelledby="titulo-login">
+    <header class="marca">
+      <div class="logo" aria-hidden="true">+</div>
+      <div>
+        <h1 id="titulo-login">CitaMedica</h1>
+        <p class="subtitulo">Sistema de gestión de citas médicas</p>
+      </div>
+    </header>
+
+    <form (submit)="$event.preventDefault(); entrar()">
+      <div class="campo">
+        <label for="usuario">Usuario</label>
+        <input
+          id="usuario"
+          type="text"
+          autocomplete="username"
+          autocapitalize="none"
+          spellcheck="false"
+          [formField]="formulario.nombreUsuario"
+        />
+      </div>
+
+      <div class="campo">
+        <label for="clave">Contraseña</label>
+        <input
+          id="clave"
+          type="password"
+          autocomplete="current-password"
+          [formField]="formulario.password"
+        />
+      </div>
+
+      @if (error(); as mensaje) {
+        <p class="mensaje-error" role="alert">{{ mensaje }}</p>
+      }
+
+      <button type="submit" class="boton-primario boton-ancho" [disabled]="!puedeEntrar()">
+        {{ enviando() ? 'Entrando…' : 'Entrar' }}
+      </button>
+    </form>
+  </section>
+</main>

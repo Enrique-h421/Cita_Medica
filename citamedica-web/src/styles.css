@@ -1,1 +1,159 @@
-/* You can add global styles to this file, and also import other style files */
+/* ===========================================================================
+   CitaMedica — estilos globales
+   ---------------------------------------------------------------------------
+   Todo el color y el espaciado del sistema sale de las variables de aquí
+   abajo. Si algún día hay que cambiar el verde por el azul de otra clínica,
+   se cambia en un solo lugar y cambia la aplicación entera.
+   =========================================================================== */
+
+:root {
+  /* Identidad */
+  --primario: #0f766e;
+  --primario-oscuro: #115e59;
+  --primario-claro: #ccfbf1;
+
+  /* Superficies */
+  --fondo: #f1f5f9;
+  --superficie: #ffffff;
+  --borde: #e2e8f0;
+
+  /* Texto */
+  --texto: #0f172a;
+  --texto-suave: #64748b;
+  --texto-inverso: #ffffff;
+
+  /* Semáforo de estados */
+  --exito: #15803d;
+  --exito-suave: #dcfce7;
+  --aviso: #b45309;
+  --aviso-suave: #fef3c7;
+  --error: #b91c1c;
+  --error-suave: #fee2e2;
+  --info: #1d4ed8;
+  --info-suave: #dbeafe;
+  --neutro: #475569;
+  --neutro-suave: #e2e8f0;
+
+  /* Medidas */
+  --radio: 10px;
+  --radio-chico: 6px;
+  --sombra: 0 1px 2px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.06);
+  --sombra-alta: 0 10px 30px rgba(15, 23, 42, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* ------------------------------ Formularios ------------------------------ */
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--texto);
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-chico);
+  background: var(--superficie);
+  color: var(--texto);
+  font-family: inherit;
+  font-size: 15px;
+}
+
+textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  /* Contorno visible en todo lo que recibe foco: sin esto, navegar con el
+     teclado es imposible y no pasa las reglas de accesibilidad. */
+  outline: 2px solid var(--primario);
+  outline-offset: 2px;
+}
+
+/* ------------------------------- Botones --------------------------------- */
+
+button {
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radio-chico);
+  padding: 10px 18px;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.boton-primario {
+  background: var(--primario);
+  color: var(--texto-inverso);
+}
+
+.boton-primario:hover:not(:disabled) {
+  background: var(--primario-oscuro);
+}
+
+.boton-secundario {
+  background: var(--superficie);
+  color: var(--texto);
+  border: 1px solid var(--borde);
+}
+
+.boton-secundario:hover:not(:disabled) {
+  background: var(--fondo);
+}
+
+/* ------------------------------- Mensajes -------------------------------- */
+
+.mensaje-error {
+  padding: 10px 14px;
+  border-radius: var(--radio-chico);
+  background: var(--error-suave);
+  color: var(--error);
+  font-size: 14px;
+}
+
+.campo-error {
+  margin-top: 6px;
+  color: var(--error);
+  font-size: 13px;
+}

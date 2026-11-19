@@ -1,0 +1,92 @@
+.barra {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 0 24px;
+  height: 60px;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borde);
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--primario);
+  color: var(--texto-inverso);
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.nombre-sistema {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.menu {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+
+.menu a {
+  padding: 7px 14px;
+  border-radius: var(--radio-chico);
+  color: var(--texto-suave);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.menu a:hover {
+  background: var(--fondo);
+  color: var(--texto);
+}
+
+.menu a.activo {
+  background: var(--primario-claro);
+  color: var(--primario-oscuro);
+}
+
+.sesion {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.identidad {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.25;
+}
+
+.usuario {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.rol {
+  color: var(--texto-suave);
+  font-size: 12px;
+}
+
+.boton-salir {
+  padding: 7px 14px;
+  font-size: 14px;
+}
+
+.contenido {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}

@@ -1,0 +1,32 @@
+<header class="barra">
+  <div class="marca">
+    <span class="logo" aria-hidden="true">+</span>
+    <span class="nombre-sistema">CitaMedica</span>
+  </div>
+
+  <nav class="menu" aria-label="Secciones">
+    <a routerLink="/agenda" routerLinkActive="activo">Agenda</a>
+
+    @if (auth.puedeAtender()) {
+      <a routerLink="/expedientes" routerLinkActive="activo">Expedientes</a>
+    }
+
+    @if (auth.esAdministrador()) {
+      <a routerLink="/usuarios" routerLinkActive="activo">Usuarios</a>
+    }
+  </nav>
+
+  <div class="sesion">
+    <div class="identidad">
+      <span class="usuario">{{ auth.nombreParaMostrar() }}</span>
+      <span class="rol">{{ auth.rolParaMostrar() }}</span>
+    </div>
+    <button type="button" class="boton-secundario boton-salir" (click)="auth.cerrarSesion()">
+      Salir
+    </button>
+  </div>
+</header>
+
+<main class="contenido">
+  <router-outlet />
+</main>
