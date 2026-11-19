@@ -23,6 +23,8 @@ namespace Catalogos.Persistence
         public DbSet<Medico> Medicos { get; set; }
         public DbSet<MedicoEspecialidad> MedicoEspecialidades { get; set; }
         public DbSet<Paciente> Pacientes { get; set; }
+        public DbSet<Rol> Roles { get; set; }
+        public DbSet<Usuario> Usuarios { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -85,6 +87,38 @@ namespace Catalogos.Persistence
                 e.Property(x => x.Pais).HasMaxLength(100);
                 e.Property(x => x.Ocupacion).HasMaxLength(150);
                 e.Property(x => x.TipoSangre).HasColumnType("varchar(10)");
+            });
+
+            // ---------------- Roles y Usuarios ----------------
+            // A diferencia de las tablas de arriba, aquí NO se declaran los tipos
+            // de columna. Las de arriba se mapearon con el esquema a la vista; de
+            // Roles y Usuarios solo se conocen con certeza los nombres de columna,
+            // y declarar un varchar(50) donde la base tiene varchar(100) es la
+            // clase de invento que ya costó una vez.
+            //
+            // Es seguro dejarlo así porque este microservicio solo LEE estas dos
+            // tablas: valida credenciales y lista usuarios. No inserta ni
+            // actualiza, así que no hay riesgo de que SQL Server truncate nada.
+            // Si más adelante se agrega alta de usuarios desde la API, hay que
+            // mirar el esquema real y declarar los tipos aquí.
+
+            modelBuilder.Entity<Rol>(e =>
+            {
+                e.ToTable("Roles");
+                e.HasKey(x => x.RolID);
+                e.Property(x => x.Nombre).IsRequired();
+            });
+
+            modelBuilder.Entity<Usuario>(e =>
+            {
+                e.ToTable("Usuarios");
+                e.HasKey(x => x.UsuarioID);
+                e.Property(x => x.NombreUsuario).IsRequired();
+                e.Property(x => x.PasswordHash).IsRequired();
+
+                e.HasOne(x => x.Rol)
+                 .WithMany(r => r.Usuarios)
+                 .HasForeignKey(x => x.RolID);
             });
         }
     }

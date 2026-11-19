@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace Core.Dtos
@@ -45,9 +46,18 @@ namespace Core.Dtos
     /// </summary>
     public class CrearAtencionDto
     {
-        [Range(1, long.MaxValue, ErrorMessage = "Debe indicar el paciente que se está atendiendo.")]
+        // El tope no es long.MaxValue a propósito: ese número no se puede
+        // representar con exactitud en JavaScript. Swagger lo tomaba para armar
+        // el ejemplo, el navegador lo redondeaba al pegarlo, y llegaba al
+        // servidor como un valor que ya no cabía en un entero.
+        // 9007199254740991 es el entero más grande que el navegador maneja sin
+        // perder precisión, y sigue estando muchísimo más allá de cualquier Id
+        // real de paciente. El DefaultValue es para que el ejemplo salga con 1.
+        [DefaultValue(1)]
+        [Range(1, 9007199254740991, ErrorMessage = "Debe indicar el paciente que se está atendiendo.")]
         public long PacienteId { get; set; }
 
+        [DefaultValue(1)]
         [Range(1, int.MaxValue, ErrorMessage = "Debe indicar el médico que atiende.")]
         public int MedicoId { get; set; }
 

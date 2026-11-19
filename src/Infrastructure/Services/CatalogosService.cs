@@ -2,6 +2,7 @@ using Core.Configs;
 using Core.Exceptions;
 using Core.Services;
 using Domain.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using NugetPackage_Rest.Exceptions;
 using NugetPackage_Rest.Interfaces.IServices;
@@ -13,16 +14,27 @@ namespace Infrastructure.Services
     /// definió en términos de negocio. Aquí, y solo aquí, se sabe que esto
     /// viaja por HTTP: los fallos de transporte se traducen a DomainException
     /// antes de salir de esta clase.
+    ///
+    /// Desde que Catálogos pide autenticación, esta clase reenvía el token con
+    /// el que entró la petición. Agenda no tiene credenciales propias ni un
+    /// usuario de servicio: actúa en nombre de quien la llamó. Eso es lo
+    /// correcto — si recepción no puede ver el catálogo de pacientes, Agenda
+    /// tampoco debe poder verlo por ella.
     /// </summary>
     internal class CatalogosService : ICatalogosService
     {
         private readonly IRest _rest;
         private readonly DownstreamOptions _options;
+        private readonly IHttpContextAccessor _contexto;
 
-        public CatalogosService(IRest rest, IOptions<DownstreamOptions> options)
+        public CatalogosService(
+            IRest rest,
+            IOptions<DownstreamOptions> options,
+            IHttpContextAccessor contexto)
         {
             _rest = rest;
             _options = options.Value;
+            _contexto = contexto;
         }
 
         // ---------------- Consultas puntuales ----------------
@@ -54,13 +66,26 @@ namespace Infrastructure.Services
         /// válido para quien valida. Cualquier otro fallo significa "no se pudo
         /// averiguar", que es muy distinto: eso sube como DomainException para
         /// que nadie confunda un servicio caído con un registro inexistente.
+        ///
+        /// Un 401 cae en el segundo caso, y está bien que así sea: si el token
+        /// no sirve, no se puede afirmar que el paciente no exista.
         /// </summary>
         private async Task<T?> ObtenerUnoAsync<T>(string endpoint, string catalogo) where T : class
         {
+            var token = TokenEntrante();
+
             try
             {
+                if (string.IsNullOrWhiteSpace(token))
+                {
+                    return await _rest.Get
+                        .WithoutAuth()
+                        .WithUri(_options.CatalogosBaseUrl, endpoint)
+                        .DeserializeWithAsync<T>();
+                }
+
                 return await _rest.Get
-                    .WithoutAuth()
+                    .WithBearer(token)
                     .WithUri(_options.CatalogosBaseUrl, endpoint)
                     .DeserializeWithAsync<T>();
             }
@@ -72,7 +97,7 @@ namespace Infrastructure.Services
             {
                 throw new DomainException(
                     Errores.CATALOGOS_NO_DISPONIBLE,
-                    $"No se pudo consultar el catálogo de {catalogo}. El servicio de Catálogos no respondió ({ex.Reason}).");
+                    $"No se pudo consultar el catálogo de {catalogo}. El servicio de Catálogos respondió con un error ({ex.Reason}, HTTP {ex.StatusCode}).");
             }
         }
 
@@ -82,12 +107,26 @@ namespace Infrastructure.Services
         /// </summary>
         private async Task<List<T>> ObtenerListaAsync<T>(string endpoint)
         {
+            var token = TokenEntrante();
+
             try
             {
-                var lista = await _rest.Get
-                    .WithoutAuth()
-                    .WithUri(_options.CatalogosBaseUrl, endpoint)
-                    .DeserializeWithAsync<List<T>>();
+                List<T>? lista;
+
+                if (string.IsNullOrWhiteSpace(token))
+                {
+                    lista = await _rest.Get
+                        .WithoutAuth()
+                        .WithUri(_options.CatalogosBaseUrl, endpoint)
+                        .DeserializeWithAsync<List<T>>();
+                }
+                else
+                {
+                    lista = await _rest.Get
+                        .WithBearer(token)
+                        .WithUri(_options.CatalogosBaseUrl, endpoint)
+                        .DeserializeWithAsync<List<T>>();
+                }
 
                 return lista ?? new List<T>();
             }
@@ -95,6 +134,31 @@ namespace Infrastructure.Services
             {
                 return new List<T>();
             }
+        }
+
+        /// <summary>
+        /// Saca el token de la cabecera Authorization de la petición en curso.
+        /// Devuelve null si no hay petición HTTP (por ejemplo si esto se llamara
+        /// desde una tarea en segundo plano) o si viene sin token; en ese caso
+        /// la llamada sale sin autenticación y Catálogos la rechazará, que es
+        /// exactamente lo que debe pasar.
+        /// </summary>
+        private string? TokenEntrante()
+        {
+            var cabecera = _contexto.HttpContext?.Request.Headers.Authorization.ToString();
+
+            if (string.IsNullOrWhiteSpace(cabecera))
+            {
+                return null;
+            }
+
+            const string prefijo = "Bearer ";
+
+            // La cabecera llega como "Bearer eyJ...". Se le quita el prefijo
+            // porque WithBearer lo vuelve a poner.
+            return cabecera.StartsWith(prefijo, StringComparison.OrdinalIgnoreCase)
+                ? cabecera[prefijo.Length..].Trim()
+                : cabecera.Trim();
         }
     }
 }

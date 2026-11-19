@@ -5,7 +5,13 @@ namespace Catalogos.Core.Exceptions
         PACIENTE_NO_ENCONTRADO = 901,
         MEDICO_NO_ENCONTRADO = 902,
         ESPECIALIDAD_NO_ENCONTRADA = 903,
-        DATOS_INVALIDOS = 904
+        DATOS_INVALIDOS = 904,
+
+        // Seguridad
+        AUTENTICACION_FALLIDA = 905,
+        USUARIO_INACTIVO = 906,
+        USUARIO_NO_ENCONTRADO = 907,
+        ROL_NO_ENCONTRADO = 908
     }
 
     /// <summary>Error de negocio con código propio; el middleware de la API lo

@@ -42,11 +42,20 @@ namespace Catalogos.Api.Middleware
             }
         }
 
+        /// <summary>
+        /// Credenciales malas es 401 (no te conozco). Cuenta desactivada es 403
+        /// (sé quién sos, pero no podés pasar): son situaciones distintas y el
+        /// frontend necesita distinguirlas para mostrar el mensaje correcto.
+        /// </summary>
         private static HttpStatusCode EstadoHttpPara(Errores codigo) => codigo switch
         {
             Errores.PACIENTE_NO_ENCONTRADO => HttpStatusCode.NotFound,
             Errores.MEDICO_NO_ENCONTRADO => HttpStatusCode.NotFound,
             Errores.ESPECIALIDAD_NO_ENCONTRADA => HttpStatusCode.NotFound,
+            Errores.USUARIO_NO_ENCONTRADO => HttpStatusCode.NotFound,
+            Errores.ROL_NO_ENCONTRADO => HttpStatusCode.NotFound,
+            Errores.AUTENTICACION_FALLIDA => HttpStatusCode.Unauthorized,
+            Errores.USUARIO_INACTIVO => HttpStatusCode.Forbidden,
             _ => HttpStatusCode.BadRequest
         };
 

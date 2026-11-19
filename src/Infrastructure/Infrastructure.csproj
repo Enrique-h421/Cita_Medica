@@ -7,6 +7,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<!-- Esta capa necesita IHttpContextAccessor para reenviarle a Catálogos
+		     el token con el que entró la petición. Es la forma estándar de que
+		     una biblioteca de clases use tipos de ASP.NET Core sin instalar
+		     paquetes: se referencia el framework compartido. -->
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0.12" />
 		<PackageReference Include="NugetPackageRest" Version="2.2.0" />
 	</ItemGroup>

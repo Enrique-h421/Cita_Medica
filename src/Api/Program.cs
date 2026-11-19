@@ -1,8 +1,13 @@
+using System.Text;
 using Api.Middleware;
 using Core;
 using GenericPersistence.Repository;
 using Infrastructure;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Persistence;
@@ -26,6 +31,54 @@ builder.Services.AddScoped<DbContext>(sp => sp.GetRequiredService<ClinicaDbConte
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 builder.Services.AddScoped<ICitaRepository, CitaRepository>();
+
+// ---------------- Autenticación ----------------
+// Agenda NO emite tokens: los emite Catálogos. Aquí solo se verifica la firma.
+// Por eso los tres valores tienen que ser idénticos a los de Catálogos; si la
+// llave difiere en un carácter, todos los tokens salen 401 sin explicación.
+var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "CitaMedica.Catalogos";
+var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "CitaMedica";
+var jwtKey = builder.Configuration["Jwt:Key"] ?? string.Empty;
+
+if (string.IsNullOrWhiteSpace(jwtKey) || Encoding.UTF8.GetByteCount(jwtKey) < 32)
+{
+    throw new InvalidOperationException(
+        "Falta la llave Jwt:Key en appsettings.json, o es muy corta. " +
+        "Tiene que ser la misma que usa el microservicio de Catálogos.");
+}
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        // Sin esto, la librería renombra los claims a URLs largas y
+        // [Authorize(Roles = ...)] deja de encontrar el rol.
+        options.MapInboundClaims = false;
+
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwtIssuer,
+
+            ValidateAudience = true,
+            ValidAudience = jwtAudience,
+
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromSeconds(30),
+
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+
+            NameClaimType = "nombreUsuario",
+            RoleClaimType = "role"
+        };
+    });
+
+// Todo endpoint que no diga nada sobre autorización queda protegido: lo que se
+// olvide queda cerrado, no abierto.
+builder.Services.AddAuthorizationBuilder()
+    .SetFallbackPolicy(new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build());
 
 // ---------------- CORS para el frontend de Angular ----------------
 const string CorsAngular = "CorsAngular";
@@ -52,7 +105,32 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
 });
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "CitaMedica - Agenda y atencion",
+        Version = "v1"
+    });
+
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Pegue el token que devuelve POST /api/Auth/login en Catalogos (puerto 5110). Solo el token, sin escribir la palabra Bearer."
+    });
+
+    options.AddSecurityRequirement(document =>
+        new OpenApiSecurityRequirement
+        {
+            [new OpenApiSecuritySchemeReference("Bearer", document)] = []
+        });
+});
+
 builder.Services.AddOpenApi();
 
 builder.Services.AddCore(builder.Configuration);            // opciones + MediatR
@@ -65,7 +143,9 @@ app.UseMiddleware<ExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    // AllowAnonymous porque la política de respaldo también alcanza a este
+    // endpoint, y el documento de OpenAPI no es secreto.
+    app.MapOpenApi().AllowAnonymous();
 
     // Swagger UI en http://localhost:5104/swagger
     app.UseSwagger();
@@ -82,7 +162,11 @@ else
 }
 
 app.UseCors(CorsAngular);
+
+// El orden importa: primero se averigua quién sos, después si podés pasar.
+app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
 
 app.Run();

@@ -18,7 +18,11 @@ namespace Infrastructure
             // 2. Registra IRest como typed client de IHttpClientFactory
             services.AddHttpClient<IRest, RestBuilder>();
 
-            // 3. Servicios que hablan con otros microservicios
+            // 3. Acceso a la petición en curso. Lo necesita CatalogosService para
+            //    reenviarle a Catálogos el token con el que entró la llamada.
+            services.AddHttpContextAccessor();
+
+            // 4. Servicios que hablan con otros microservicios
             services.AddScoped<ICatalogosService, CatalogosService>();
             services.AddScoped<IPagoService, PagoService>();
 

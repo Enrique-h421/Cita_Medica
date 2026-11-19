@@ -1,12 +1,22 @@
 using Core.Commands;
 using Core.Dtos;
 using Core.Queries;
+using Domain.Seguridad;
 using GenericPersistence.Repository;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
+    /// <summary>
+    /// Agenda de citas.
+    ///
+    /// Leer la agenda lo puede hacer cualquiera que haya iniciado sesión: el
+    /// médico necesita ver su día igual que recepción. Agendar, mover y cancelar
+    /// es trabajo de recepción y del administrador — un médico no se pone citas
+    /// a sí mismo.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     [Produces("application/json")]
@@ -22,6 +32,7 @@ namespace Api.Controllers
         /// <summary>Todas las citas.</summary>
         [HttpGet]
         [ProducesResponseType(typeof(List<CitaDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> GetTodas()
         {
             var citas = await _mediator.Send(new ObtenerCitasQuery());
@@ -61,20 +72,24 @@ namespace Api.Controllers
             return Ok(cita);
         }
 
-        /// <summary>Crea una cita.</summary>
+        /// <summary>Crea una cita. Recepción y administración.</summary>
         [HttpPost]
+        [Authorize(Roles = RolesSistema.AdministradorORecepcion)]
         [ProducesResponseType(typeof(CitaDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> Post([FromBody] CrearCitaDto cita)
         {
             var creada = await _mediator.Send(new CrearCitaCommand { Cita = cita });
             return CreatedAtAction(nameof(GetPorId), new { id = creada.CitaId }, creada);
         }
 
-        /// <summary>Modifica una cita existente.</summary>
+        /// <summary>Modifica una cita existente. Recepción y administración.</summary>
         [HttpPut("{id:long}")]
+        [Authorize(Roles = RolesSistema.AdministradorORecepcion)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Put(long id, [FromBody] ActualizarCitaDto cita)
         {
@@ -82,9 +97,11 @@ namespace Api.Controllers
             return NoContent();
         }
 
-        /// <summary>Elimina una cita.</summary>
+        /// <summary>Elimina una cita. Recepción y administración.</summary>
         [HttpDelete("{id:long}")]
+        [Authorize(Roles = RolesSistema.AdministradorORecepcion)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(long id)
         {
