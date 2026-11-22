@@ -1,0 +1,252 @@
+:host {
+  display: block;
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.migas {
+  margin-bottom: 14px;
+}
+
+.enlace-volver {
+  padding: 6px 0;
+  background: none;
+  border: none;
+  color: var(--texto-suave);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.enlace-volver:hover {
+  color: var(--primario);
+}
+
+/* -------------------------------- Ficha ---------------------------------- */
+
+.ficha {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 20px 24px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-left: 4px solid var(--primario);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+}
+
+h1 {
+  font-size: 20px;
+}
+
+.ficha-detalle {
+  margin: 4px 0 0;
+  color: var(--texto-suave);
+  font-size: 14px;
+}
+
+.expediente {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: 8px 14px;
+  background: var(--primario-claro);
+  border-radius: var(--radio-chico);
+}
+
+.expediente-etiqueta {
+  color: var(--primario-oscuro);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.expediente-numero {
+  color: var(--primario-oscuro);
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ----------------------------- Línea de tiempo --------------------------- */
+
+.titulo-seccion {
+  margin: 26px 0 14px;
+  font-size: 15px;
+  color: var(--texto-suave);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.linea-tiempo {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.consulta {
+  position: relative;
+  margin-bottom: 14px;
+  padding: 20px 24px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+}
+
+.consulta-anulada {
+  opacity: 0.6;
+}
+
+.consulta-cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.consulta-fecha {
+  display: block;
+  font-weight: 600;
+  /* La fecha viene de Intl y empieza en minúscula ("lunes, 20 de…"). */
+  text-transform: capitalize;
+}
+
+.consulta-hora {
+  display: block;
+  margin-top: 2px;
+  color: var(--texto-suave);
+  font-size: 13px;
+}
+
+.consulta-medico {
+  margin: 10px 0 0;
+  color: var(--texto-suave);
+  font-size: 14px;
+}
+
+.apartado {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--borde);
+}
+
+.apartado h3 {
+  margin-bottom: 4px;
+  color: var(--texto-suave);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.apartado p {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* ---------------------------- Diagnósticos ------------------------------- */
+
+.lista-diagnosticos {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.diagnostico {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.diagnostico:last-child {
+  margin-bottom: 0;
+}
+
+/* El código va en monoespaciada: así las columnas de letras y números quedan
+   alineadas de una fila a otra y la lista se lee de un vistazo. */
+.codigo {
+  padding: 2px 8px;
+  background: var(--primario-claro);
+  border-radius: var(--radio-chico);
+  color: var(--primario-oscuro);
+  font-family: "Cascadia Mono", Consolas, monospace;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.diagnostico .nombre {
+  font-size: 15px;
+}
+
+.diagnostico .nota {
+  color: var(--texto-suave);
+  font-size: 13px;
+  font-style: italic;
+}
+
+.etiqueta {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.etiqueta-principal {
+  background: var(--info-suave);
+  color: var(--info);
+}
+
+.nota-abierta {
+  margin: 16px 0 0;
+  padding: 10px 14px;
+  background: var(--aviso-suave);
+  border-radius: var(--radio-chico);
+  color: var(--aviso);
+  font-size: 13px;
+}
+
+/* ------------------------------- Estados --------------------------------- */
+
+.estado {
+  display: inline-block;
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.estado-exito {
+  background: var(--exito-suave);
+  color: var(--exito);
+}
+
+.estado-aviso {
+  background: var(--aviso-suave);
+  color: var(--aviso);
+}
+
+.estado-neutro {
+  background: var(--neutro-suave);
+  color: var(--neutro);
+}
+
+.caja-vacia {
+  padding: 48px 24px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  color: var(--texto-suave);
+  text-align: center;
+}

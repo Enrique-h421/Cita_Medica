@@ -27,7 +27,12 @@ namespace Core.Exceptions
         ATENCION_INVALIDA = 811,
         ATENCION_YA_CERRADA = 812,
         ATENCION_YA_ANULADA = 813,
-        EXPEDIENTE_NO_ENCONTRADO = 814
+        EXPEDIENTE_NO_ENCONTRADO = 814,
+
+        // Diagnósticos (catálogo CIE-10 y diagnósticos de una consulta)
+        DIAGNOSTICO_NO_ENCONTRADO = 815,
+        DIAGNOSTICO_INVALIDO = 816,
+        DIAGNOSTICO_DUPLICADO = 817
     }
 
     /// <summary>Error de negocio con código propio; el middleware de la API lo

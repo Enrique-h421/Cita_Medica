@@ -1,0 +1,161 @@
+<nav class="migas">
+  <button type="button" class="enlace-volver" (click)="cancelar()">← Volver a pacientes</button>
+</nav>
+
+<h1>Registrar paciente</h1>
+
+<form class="tarjeta" (submit)="$event.preventDefault(); guardar()">
+  @if (error(); as mensaje) {
+    <p class="mensaje-error" role="alert">{{ mensaje }}</p>
+  }
+
+  <h2 class="titulo-grupo">Identificación</h2>
+
+  <div class="trio">
+    <div class="campo">
+      <label for="codigo">Código del paciente</label>
+      <input id="codigo" type="text" [value]="codigo()" (input)="cambiar(codigo, $event)" />
+    </div>
+
+    <div class="campo">
+      <label for="tipoDoc">Tipo de documento</label>
+      <select id="tipoDoc" (change)="cambiar(tipoDocumento, $event)">
+        @for (tipo of tiposDocumento; track tipo) {
+          <option [value]="tipo" [selected]="tipo === tipoDocumento()">{{ tipo }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="campo">
+      <label for="numeroDoc">Número de documento</label>
+      <input
+        id="numeroDoc"
+        type="text"
+        placeholder="00000000-0"
+        [value]="numeroDocumento()"
+        (input)="cambiar(numeroDocumento, $event)"
+      />
+    </div>
+  </div>
+
+  <h2 class="titulo-grupo">Datos personales</h2>
+
+  <div class="pareja">
+    <div class="campo">
+      <label for="nombres">Nombres</label>
+      <input id="nombres" type="text" [value]="nombres()" (input)="cambiar(nombres, $event)" />
+    </div>
+
+    <div class="campo">
+      <label for="apellidos">Apellidos</label>
+      <input
+        id="apellidos"
+        type="text"
+        [value]="apellidos()"
+        (input)="cambiar(apellidos, $event)"
+      />
+    </div>
+  </div>
+
+  <div class="trio">
+    <div class="campo">
+      <label for="nacimiento">Fecha de nacimiento</label>
+      <input
+        id="nacimiento"
+        type="date"
+        [value]="fechaNacimiento()"
+        (change)="cambiar(fechaNacimiento, $event)"
+      />
+    </div>
+
+    <div class="campo">
+      <label for="sexo">Sexo</label>
+      <select id="sexo" (change)="cambiar(sexo, $event)">
+        <option value="">Seleccione…</option>
+        <option value="M" [selected]="sexo() === 'M'">Masculino</option>
+        <option value="F" [selected]="sexo() === 'F'">Femenino</option>
+      </select>
+    </div>
+
+    <div class="campo">
+      <label for="sangre">Tipo de sangre</label>
+      <select id="sangre" (change)="cambiar(tipoSangre, $event)">
+        <option value="">Sin registrar</option>
+        @for (tipo of tiposSangre; track tipo) {
+          <option [value]="tipo" [selected]="tipo === tipoSangre()">{{ tipo }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <div class="pareja">
+    <div class="campo">
+      <label for="civil">Estado civil</label>
+      <select id="civil" (change)="cambiar(estadoCivil, $event)">
+        <option value="">Sin registrar</option>
+        @for (estado of estadosCiviles; track estado) {
+          <option [value]="estado" [selected]="estado === estadoCivil()">{{ estado }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="campo">
+      <label for="ocupacion">Ocupación</label>
+      <input
+        id="ocupacion"
+        type="text"
+        [value]="ocupacion()"
+        (input)="cambiar(ocupacion, $event)"
+      />
+    </div>
+  </div>
+
+  <h2 class="titulo-grupo">Contacto</h2>
+
+  <div class="pareja">
+    <div class="campo">
+      <label for="telefono">Teléfono</label>
+      <input
+        id="telefono"
+        type="tel"
+        placeholder="0000-0000"
+        [value]="telefono()"
+        (input)="cambiar(telefono, $event)"
+      />
+    </div>
+
+    <div class="campo">
+      <label for="email">Correo electrónico</label>
+      <input id="email" type="email" [value]="email()" (input)="cambiar(email, $event)" />
+    </div>
+  </div>
+
+  <div class="campo">
+    <label for="direccion">Dirección</label>
+    <input
+      id="direccion"
+      type="text"
+      [value]="direccion()"
+      (input)="cambiar(direccion, $event)"
+    />
+  </div>
+
+  <div class="pareja">
+    <div class="campo">
+      <label for="ciudad">Ciudad</label>
+      <input id="ciudad" type="text" [value]="ciudad()" (input)="cambiar(ciudad, $event)" />
+    </div>
+
+    <div class="campo">
+      <label for="pais">País</label>
+      <input id="pais" type="text" [value]="pais()" (input)="cambiar(pais, $event)" />
+    </div>
+  </div>
+
+  <footer class="acciones">
+    <button type="button" class="boton-secundario" (click)="cancelar()">Cancelar</button>
+    <button type="submit" class="boton-primario" [disabled]="!puedeGuardar()">
+      {{ guardando() ? 'Registrando…' : 'Registrar paciente' }}
+    </button>
+  </footer>
+</form>

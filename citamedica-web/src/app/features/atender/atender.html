@@ -1,0 +1,189 @@
+<nav class="migas">
+  <button type="button" class="enlace-volver" (click)="volver()">← Volver a la agenda</button>
+</nav>
+
+@if (cargando()) {
+  <div class="caja-vacia">Cargando la consulta…</div>
+} @else if (!cita()) {
+  <div class="mensaje-error" role="alert">{{ error() ?? 'No se encontró la cita.' }}</div>
+} @else {
+  <article class="ficha">
+    <header class="ficha-cabecera">
+      <div>
+        <h1>{{ cita()!.pacienteNombre ?? 'Paciente #' + cita()!.pacienteId }}</h1>
+        <p class="ficha-detalle">
+          Cita del {{ fechaCorta(cita()!.fechaHoraInicio) }} a las {{ hora(cita()!.fechaHoraInicio) }}
+          · {{ cita()!.medicoNombre ?? 'Médico #' + cita()!.medicoId }}
+          @if (cita()!.consultorioNombre) {
+            · {{ cita()!.consultorioNombre }}
+          }
+        </p>
+      </div>
+
+      @if (atencion(); as a) {
+        <div class="expediente">
+          <span class="expediente-etiqueta">Expediente</span>
+          <span class="expediente-numero">{{ a.numeroExpediente }}</span>
+        </div>
+      }
+    </header>
+  </article>
+
+  @if (error(); as mensaje) {
+    <p class="mensaje-error" role="alert">{{ mensaje }}</p>
+  }
+
+  @if (!consultaAbierta()) {
+    <section class="caja-inicio">
+      <h2>Iniciar consulta</h2>
+      <p>
+        Al iniciarla queda registrada la hora de inicio y se abre el expediente del
+        paciente si todavía no tiene uno.
+      </p>
+      <button
+        type="button"
+        class="boton-primario boton-grande"
+        (click)="iniciar()"
+        [disabled]="trabajando()"
+      >
+        {{ trabajando() ? 'Iniciando…' : 'Iniciar consulta' }}
+      </button>
+    </section>
+  } @else {
+    <section class="caja-consulta">
+      <header class="consulta-cabecera">
+        <h2>Consulta en curso</h2>
+        <span class="marca-tiempo">Iniciada a las {{ hora(atencion()!.fechaInicio) }}</span>
+      </header>
+
+      <form (submit)="$event.preventDefault(); cerrar()">
+        <div class="campo">
+          <label for="motivo">Motivo de consulta</label>
+          <input
+            id="motivo"
+            type="text"
+            placeholder="¿Por qué viene el paciente?"
+            [formField]="formulario.motivoConsulta"
+          />
+        </div>
+
+        <div class="campo">
+          <label for="enfermedad">Enfermedad actual</label>
+          <textarea
+            id="enfermedad"
+            placeholder="Cómo empezó, cómo ha evolucionado, qué síntomas tiene"
+            [formField]="formulario.enfermedadActual"
+          ></textarea>
+        </div>
+
+        <div class="campo">
+          <label for="exploracion">Exploración física</label>
+          <textarea
+            id="exploracion"
+            placeholder="Hallazgos del examen físico y signos vitales"
+            [formField]="formulario.exploracionFisica"
+          ></textarea>
+        </div>
+
+        <div class="campo">
+          <label for="observaciones">Observaciones e indicaciones</label>
+          <textarea
+            id="observaciones"
+            placeholder="Tratamiento indicado, controles, recomendaciones"
+            [formField]="formulario.observaciones"
+          ></textarea>
+        </div>
+
+        <section class="bloque-diagnosticos">
+          <h3 class="titulo-bloque">Diagnósticos</h3>
+
+          @if (diagnosticos().length === 0) {
+            <p class="sin-diagnosticos">
+              Esta consulta todavía no tiene diagnósticos. El primero que agregue
+              queda como principal.
+            </p>
+          } @else {
+            <ul class="lista-diagnosticos">
+              @for (d of diagnosticos(); track d.atencionDiagnosticoId) {
+                <li class="diagnostico">
+                  @if (d.codigoCIE10) {
+                    <span class="codigo">{{ d.codigoCIE10 }}</span>
+                  }
+                  <span class="nombre">{{ d.nombre }}</span>
+                  <span [class]="claseTipo(d)">{{ textoTipo(d) }}</span>
+
+                  <button
+                    type="button"
+                    class="quitar"
+                    [attr.aria-label]="'Quitar ' + (d.nombre ?? 'diagnóstico')"
+                    [disabled]="guardandoDiagnostico()"
+                    (click)="quitarDiagnostico(d)"
+                  >
+                    ×
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+
+          <div class="buscador">
+            <label for="buscar-diagnostico">Agregar diagnóstico</label>
+
+            <input
+              id="buscar-diagnostico"
+              type="text"
+              autocomplete="off"
+              placeholder="Escriba el nombre o el código CIE-10 — por ejemplo faringitis, o J02"
+              [value]="busqueda()"
+              (input)="alEscribir($event)"
+              (keydown.enter)="evitarEnvio($event)"
+            />
+
+            @if (buscando()) {
+              <p class="pista">Buscando en el catálogo…</p>
+            } @else if (resultados().length > 0) {
+              <ul class="resultados">
+                @for (r of resultados(); track r.diagnosticoId) {
+                  <li>
+                    <button
+                      type="button"
+                      class="resultado"
+                      [disabled]="guardandoDiagnostico()"
+                      (click)="agregarDiagnostico(r)"
+                    >
+                      @if (r.codigoCIE10) {
+                        <span class="codigo">{{ r.codigoCIE10 }}</span>
+                      }
+                      <span class="nombre">{{ r.nombre }}</span>
+                    </button>
+                  </li>
+                }
+              </ul>
+            } @else if (busqueda().trim().length >= 2) {
+              <p class="pista">Ningún diagnóstico del catálogo coincide con esa búsqueda.</p>
+            }
+          </div>
+
+          @if (errorDiagnostico(); as mensaje) {
+            <p class="mensaje-error" role="alert">{{ mensaje }}</p>
+          }
+        </section>
+
+        <footer class="acciones">
+          <p class="aviso-cierre">
+            Al cerrar la consulta, el registro queda firmado y ya no se puede
+            modificar. La cita pasará a <strong>Atendida</strong>.
+          </p>
+
+          <button
+            type="submit"
+            class="boton-primario boton-grande"
+            [disabled]="trabajando()"
+          >
+            {{ trabajando() ? 'Cerrando…' : 'Cerrar consulta' }}
+          </button>
+        </footer>
+      </form>
+    </section>
+  }
+}

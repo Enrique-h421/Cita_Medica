@@ -7,6 +7,8 @@
   <nav class="menu" aria-label="Secciones">
     <a routerLink="/agenda" routerLinkActive="activo">Agenda</a>
 
+    <a routerLink="/pacientes" routerLinkActive="activo">Pacientes</a>
+
     @if (auth.puedeAtender()) {
       <a routerLink="/expedientes" routerLinkActive="activo">Expedientes</a>
     }

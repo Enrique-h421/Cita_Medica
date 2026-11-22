@@ -62,6 +62,15 @@ namespace Api.Middleware
             Errores.PASARELA_NO_DISPONIBLE => HttpStatusCode.ServiceUnavailable,
             Errores.ATENCION_YA_CERRADA => HttpStatusCode.Conflict,
             Errores.ATENCION_YA_ANULADA => HttpStatusCode.Conflict,
+
+            // El diagnóstico que se pidió quitar no está en esa consulta: 404,
+            // igual que cualquier recurso que no existe en esa ruta.
+            Errores.DIAGNOSTICO_NO_ENCONTRADO => HttpStatusCode.NotFound,
+
+            // Ya está registrado: la petición es válida, lo que choca es el
+            // estado actual del recurso. Eso es 409, no 400.
+            Errores.DIAGNOSTICO_DUPLICADO => HttpStatusCode.Conflict,
+
             _ => HttpStatusCode.BadRequest
         };
 

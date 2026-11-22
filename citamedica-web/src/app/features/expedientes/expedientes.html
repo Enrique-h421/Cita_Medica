@@ -1,0 +1,74 @@
+<header class="encabezado">
+  <div>
+    <h1>Expedientes clínicos</h1>
+    <p class="resumen">
+      @if (cargando()) {
+        Cargando…
+      } @else {
+        {{ expedientes().length }}
+        {{ expedientes().length === 1 ? 'expediente abierto' : 'expedientes abiertos' }}
+      }
+    </p>
+  </div>
+
+  <button type="button" class="boton-secundario" (click)="cargar()" [disabled]="cargando()">
+    Actualizar
+  </button>
+</header>
+
+@if (error(); as mensaje) {
+  <div class="mensaje-error" role="alert">
+    {{ mensaje }}
+    <button type="button" class="boton-secundario boton-reintentar" (click)="cargar()">
+      Reintentar
+    </button>
+  </div>
+} @else if (cargando()) {
+  <div class="caja-vacia">Cargando los expedientes…</div>
+} @else if (expedientes().length === 0) {
+  <div class="caja-vacia">
+    <p class="titulo-vacio">Todavía no hay expedientes</p>
+    <p>
+      El expediente de un paciente se abre solo cuando se le registra su primera
+      consulta.
+    </p>
+  </div>
+} @else {
+  <div class="tabla-marco">
+    <table class="tabla">
+      <caption class="oculto">Listado de expedientes clínicos</caption>
+      <thead>
+        <tr>
+          <th scope="col">Expediente</th>
+          <th scope="col">Paciente</th>
+          <th scope="col">Apertura</th>
+          <th scope="col">Consultas</th>
+          <th scope="col"><span class="oculto">Acciones</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (expediente of expedientes(); track expediente.expedienteId) {
+          <tr>
+            <td class="celda-numero">{{ expediente.numeroExpediente }}</td>
+
+            <td class="principal">
+              {{ expediente.pacienteNombre ?? 'Paciente #' + expediente.pacienteId }}
+            </td>
+
+            <td class="celda-suave">{{ fechaCorta(expediente.fechaApertura) }}</td>
+
+            <td>
+              <span class="contador">{{ expediente.totalAtenciones }}</span>
+            </td>
+
+            <td class="celda-accion">
+              <button type="button" class="boton-secundario boton-ver" (click)="abrir(expediente)">
+                Ver historial
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

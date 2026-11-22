@@ -1,4 +1,5 @@
 using Domain.AgendaYAtencion;
+using Domain.Diagnosticos;
 using Domain.Expedientes;
 using Domain.Organizacion;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,8 @@ namespace Persistence
         public DbSet<Area> Areas { get; set; }
         public DbSet<Atencion> Atenciones { get; set; }
         public DbSet<ExpedienteClinico> Expedientes_Clinicos { get; set; }
+        public DbSet<Diagnostico> Diagnosticos { get; set; }
+        public DbSet<AtencionDiagnostico> Atencion_Diagnostico { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -104,6 +107,41 @@ namespace Persistence
                 e.HasOne(x => x.Cita)
                  .WithMany()
                  .HasForeignKey(x => x.CitaID);
+            });
+
+            // ---------------- Catálogo de diagnósticos (CIE-10) ----------------
+            modelBuilder.Entity<Diagnostico>(e =>
+            {
+                e.ToTable("Diagnosticos");
+                e.HasKey(x => x.DiagnosticoID);
+
+                // En la base es varchar(20), no nvarchar: un código CIE-10 es
+                // ASCII puro ("J02.9"), así que no hace falta Unicode.
+                e.Property(x => x.CodigoCIE10).HasColumnType("varchar(20)");
+
+                e.Property(x => x.Nombre).HasMaxLength(300).IsRequired();
+                e.Property(x => x.Descripcion).HasMaxLength(1000);
+            });
+
+            // ---------------- Diagnósticos de una atención ----------------
+            modelBuilder.Entity<AtencionDiagnostico>(e =>
+            {
+                e.ToTable("Atencion_Diagnostico");
+                e.HasKey(x => x.AtencionDiagnosticoID);
+                e.Property(x => x.TipoDiagnostico).HasColumnType("varchar(30)").IsRequired();
+                e.Property(x => x.Observaciones).HasMaxLength(1000);
+
+                // Sin colección inversa en Atencion a propósito: los
+                // diagnósticos se cargan desde esta tabla hacia el catálogo,
+                // que es un solo nivel de include. Cargarlos desde la atención
+                // necesitaría ThenInclude, que GenericPersistence no soporta.
+                e.HasOne(x => x.Atencion)
+                 .WithMany()
+                 .HasForeignKey(x => x.AtencionID);
+
+                e.HasOne(x => x.Diagnostico)
+                 .WithMany()
+                 .HasForeignKey(x => x.DiagnosticoID);
             });
 
             // ---------------- Relaciones de Cita ----------------

@@ -38,6 +38,13 @@ namespace Core.Dtos
 
         /// <summary>ABIERTA, CERRADA o ANULADA.</summary>
         public string Estado { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Lo que el médico concluyó: primero el diagnóstico principal y
+        /// después los secundarios. Llega vacía mientras no se le haya puesto
+        /// ninguno, que es lo normal en una consulta recién abierta.
+        /// </summary>
+        public List<AtencionDiagnosticoDto> Diagnosticos { get; set; } = new();
     }
 
     /// <summary>

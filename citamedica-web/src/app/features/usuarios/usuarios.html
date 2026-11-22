@@ -1,0 +1,98 @@
+<header class="encabezado">
+  <div>
+    <h1>Usuarios del sistema</h1>
+    <p class="resumen">
+      @if (cargando()) {
+        Cargando…
+      } @else {
+        {{ usuarios().length }} {{ usuarios().length === 1 ? 'usuario' : 'usuarios' }}
+        en {{ roles().length }} {{ roles().length === 1 ? 'rol' : 'roles' }}
+      }
+    </p>
+  </div>
+
+  <button type="button" class="boton-secundario" (click)="cargar()" [disabled]="cargando()">
+    Actualizar
+  </button>
+</header>
+
+@if (error(); as mensaje) {
+  <div class="mensaje-error" role="alert">
+    {{ mensaje }}
+    <button type="button" class="boton-secundario boton-reintentar" (click)="cargar()">
+      Reintentar
+    </button>
+  </div>
+} @else if (cargando()) {
+  <div class="caja-vacia">Cargando los usuarios…</div>
+} @else {
+  @if (roles().length > 0) {
+    <section class="roles">
+      @for (rol of roles(); track rol.rolId) {
+        <article class="tarjeta-rol">
+          <h2>{{ rol.nombre }}</h2>
+          @if (rol.descripcion) {
+            <p class="rol-descripcion">{{ rol.descripcion }}</p>
+          }
+          <p class="rol-cuenta">
+            {{ rol.totalUsuarios }}
+            {{ rol.totalUsuarios === 1 ? 'usuario' : 'usuarios' }}
+          </p>
+        </article>
+      }
+    </section>
+  }
+
+  <div class="tabla-marco">
+    <table class="tabla">
+      <caption class="oculto">Listado de usuarios del sistema</caption>
+      <thead>
+        <tr>
+          <th scope="col">Usuario</th>
+          <th scope="col">Nombre</th>
+          <th scope="col">Correo</th>
+          <th scope="col">Rol</th>
+          <th scope="col">Estado</th>
+          <th scope="col">Alta</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (usuario of usuarios(); track usuario.usuarioId) {
+          <tr>
+            <td class="celda-usuario">{{ usuario.nombreUsuario }}</td>
+
+            <td>
+              <span class="principal">{{ usuario.nombreCompleto ?? '—' }}</span>
+              @if (usuario.medicoId !== null) {
+                <span class="secundario">Ficha de médico #{{ usuario.medicoId }}</span>
+              }
+            </td>
+
+            <td class="celda-suave">{{ usuario.email ?? '—' }}</td>
+
+            <td>
+              <span class="rol-distintivo">{{ usuario.rolNombre ?? 'Rol #' + usuario.rolId }}</span>
+            </td>
+
+            <td>
+              @if (usuario.activo) {
+                <span class="estado estado-exito">Activo</span>
+              } @else {
+                <span class="estado estado-neutro">Inactivo</span>
+              }
+            </td>
+
+            <td class="celda-suave">{{ fechaCorta(usuario.fechaCreacion) }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <p class="nota-seguridad">
+    Las contraseñas no se guardan en ningún lado: de cada usuario solo existe un
+    derivado criptográfico con sal propia, del que no se puede volver a la
+    contraseña original. Esta pantalla no las muestra porque el servidor
+    tampoco las conoce.
+  </p>
+}

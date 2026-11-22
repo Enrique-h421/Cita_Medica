@@ -3,6 +3,7 @@ using Core.Exceptions;
 using Core.Mappings;
 using Core.Services;
 using Domain.AgendaYAtencion;
+using Domain.Diagnosticos;
 using Domain.Expedientes;
 using GenericPersistence.FiltroDinamico;
 using GenericPersistence.Repository;
@@ -21,11 +22,16 @@ namespace Core.Features.Atenciones
         private const string OrdenPorDefecto = "FechaInicio descending";
 
         private readonly IGenericRepository<Atencion> _repo;
+        private readonly IGenericRepository<AtencionDiagnostico> _diagnosticos;
         private readonly ICatalogosService _catalogos;
 
-        public ObtenerAtencionesHandler(IGenericRepository<Atencion> repo, ICatalogosService catalogos)
+        public ObtenerAtencionesHandler(
+            IGenericRepository<Atencion> repo,
+            IGenericRepository<AtencionDiagnostico> diagnosticos,
+            ICatalogosService catalogos)
         {
             _repo = repo;
+            _diagnosticos = diagnosticos;
             _catalogos = catalogos;
         }
 
@@ -40,6 +46,7 @@ namespace Core.Features.Atenciones
 
             var dtos = pagina.Data.ToDtoList();
             await dtos.EnriquecerAsync(_catalogos, cancellationToken);
+            await dtos.CargarDiagnosticosAsync(_diagnosticos, cancellationToken);
             return dtos;
         }
     }
@@ -54,15 +61,18 @@ namespace Core.Features.Atenciones
     {
         private readonly IGenericRepository<Atencion> _repo;
         private readonly IGenericRepository<ExpedienteClinico> _expedientes;
+        private readonly IGenericRepository<AtencionDiagnostico> _diagnosticos;
         private readonly ICatalogosService _catalogos;
 
         public ObtenerAtencionPorIdHandler(
             IGenericRepository<Atencion> repo,
             IGenericRepository<ExpedienteClinico> expedientes,
+            IGenericRepository<AtencionDiagnostico> diagnosticos,
             ICatalogosService catalogos)
         {
             _repo = repo;
             _expedientes = expedientes;
+            _diagnosticos = diagnosticos;
             _catalogos = catalogos;
         }
 
@@ -85,6 +95,7 @@ namespace Core.Features.Atenciones
 
             var lista = new List<AtencionDto> { dto };
             await lista.EnriquecerAsync(_catalogos, cancellationToken);
+            await lista.CargarDiagnosticosAsync(_diagnosticos, cancellationToken);
 
             return dto;
         }
@@ -102,12 +113,16 @@ namespace Core.Features.Atenciones
         : IRequestHandler<ObtenerAtencionesPaginadasQuery, PagedResult<AtencionDto>>
     {
         private readonly IGenericRepository<Atencion> _repo;
+        private readonly IGenericRepository<AtencionDiagnostico> _diagnosticos;
         private readonly ICatalogosService _catalogos;
 
         public ObtenerAtencionesPaginadasHandler(
-            IGenericRepository<Atencion> repo, ICatalogosService catalogos)
+            IGenericRepository<Atencion> repo,
+            IGenericRepository<AtencionDiagnostico> diagnosticos,
+            ICatalogosService catalogos)
         {
             _repo = repo;
+            _diagnosticos = diagnosticos;
             _catalogos = catalogos;
         }
 
@@ -128,6 +143,7 @@ namespace Core.Features.Atenciones
 
             var dtos = pagina.Data.ToDtoList();
             await dtos.EnriquecerAsync(_catalogos, cancellationToken);
+            await dtos.CargarDiagnosticosAsync(_diagnosticos, cancellationToken);
 
             return new PagedResult<AtencionDto>
             {
@@ -151,12 +167,16 @@ namespace Core.Features.Atenciones
         private const int TopeHistorial = 500;
 
         private readonly IGenericRepository<Atencion> _repo;
+        private readonly IGenericRepository<AtencionDiagnostico> _diagnosticos;
         private readonly ICatalogosService _catalogos;
 
         public ObtenerAtencionesPorPacienteHandler(
-            IGenericRepository<Atencion> repo, ICatalogosService catalogos)
+            IGenericRepository<Atencion> repo,
+            IGenericRepository<AtencionDiagnostico> diagnosticos,
+            ICatalogosService catalogos)
         {
             _repo = repo;
+            _diagnosticos = diagnosticos;
             _catalogos = catalogos;
         }
 
@@ -173,6 +193,7 @@ namespace Core.Features.Atenciones
 
             var dtos = pagina.Data.ToDtoList();
             await dtos.EnriquecerAsync(_catalogos, cancellationToken);
+            await dtos.CargarDiagnosticosAsync(_diagnosticos, cancellationToken);
             return dtos;
         }
     }
@@ -340,6 +361,7 @@ namespace Core.Features.Atenciones
         private readonly IGenericRepository<ExpedienteClinico> _expedientes;
         private readonly IGenericRepository<Cita> _citas;
         private readonly IGenericRepository<EstadoCita> _estados;
+        private readonly IGenericRepository<AtencionDiagnostico> _diagnosticos;
         private readonly ICatalogosService _catalogos;
 
         public CerrarAtencionHandler(
@@ -347,12 +369,14 @@ namespace Core.Features.Atenciones
             IGenericRepository<ExpedienteClinico> expedientes,
             IGenericRepository<Cita> citas,
             IGenericRepository<EstadoCita> estados,
+            IGenericRepository<AtencionDiagnostico> diagnosticos,
             ICatalogosService catalogos)
         {
             _repo = repo;
             _expedientes = expedientes;
             _citas = citas;
             _estados = estados;
+            _diagnosticos = diagnosticos;
             _catalogos = catalogos;
         }
 
@@ -405,6 +429,11 @@ namespace Core.Features.Atenciones
 
             var lista = new List<AtencionDto> { dto };
             await lista.EnriquecerAsync(_catalogos, cancellationToken);
+
+            // Los diagnósticos se devuelven en la respuesta del cierre porque es
+            // el documento que el médico acaba de firmar: la pantalla muestra el
+            // resumen de la consulta sin tener que volver a pedirla.
+            await lista.CargarDiagnosticosAsync(_diagnosticos, cancellationToken);
 
             return dto;
         }

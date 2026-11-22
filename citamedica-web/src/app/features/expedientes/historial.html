@@ -1,0 +1,116 @@
+<nav class="migas">
+  <button type="button" class="enlace-volver" (click)="volver()">← Volver a expedientes</button>
+</nav>
+
+@if (cargando()) {
+  <div class="caja-vacia">Cargando el historial…</div>
+} @else if (error(); as mensaje) {
+  <div class="mensaje-error" role="alert">{{ mensaje }}</div>
+} @else if (expediente(); as exp) {
+  <article class="ficha">
+    <div>
+      <h1>{{ exp.pacienteNombre ?? 'Paciente #' + exp.pacienteId }}</h1>
+      <p class="ficha-detalle">
+        Expediente abierto el {{ fechaCorta(exp.fechaApertura) }} ·
+        {{ exp.totalAtenciones }}
+        {{ exp.totalAtenciones === 1 ? 'consulta registrada' : 'consultas registradas' }}
+      </p>
+    </div>
+
+    <div class="expediente">
+      <span class="expediente-etiqueta">Expediente</span>
+      <span class="expediente-numero">{{ exp.numeroExpediente }}</span>
+    </div>
+  </article>
+
+  <h2 class="titulo-seccion">Historial de consultas</h2>
+
+  @if (atenciones().length === 0) {
+    <div class="caja-vacia">Este expediente todavía no tiene consultas registradas.</div>
+  } @else {
+    <ol class="linea-tiempo">
+      @for (atencion of atenciones(); track atencion.atencionId) {
+        <li class="consulta" [class.consulta-anulada]="estaAnulada(atencion)">
+          <header class="consulta-cabecera">
+            <div>
+              <span class="consulta-fecha">{{ fechaLarga(atencion.fechaInicio) }}</span>
+              <span class="consulta-hora">
+                {{ hora(atencion.fechaInicio) }}
+                @if (atencion.fechaFin) {
+                  – {{ hora(atencion.fechaFin) }}
+                }
+                @if (atencion.duracionMinutos !== null) {
+                  · {{ atencion.duracionMinutos }} min
+                }
+              </span>
+            </div>
+
+            <span [class]="claseEstado(atencion.estado)">{{ textoEstado(atencion.estado) }}</span>
+          </header>
+
+          <p class="consulta-medico">
+            Atendida por {{ atencion.medicoNombre ?? 'Médico #' + atencion.medicoId }}
+          </p>
+
+          @if (atencion.motivoConsulta) {
+            <div class="apartado">
+              <h3>Motivo de consulta</h3>
+              <p>{{ atencion.motivoConsulta }}</p>
+            </div>
+          }
+
+          @if (atencion.enfermedadActual) {
+            <div class="apartado">
+              <h3>Enfermedad actual</h3>
+              <p>{{ atencion.enfermedadActual }}</p>
+            </div>
+          }
+
+          @if (atencion.exploracionFisica) {
+            <div class="apartado">
+              <h3>Exploración física</h3>
+              <p>{{ atencion.exploracionFisica }}</p>
+            </div>
+          }
+
+          @if (diagnosticosDe(atencion); as diagnosticos) {
+            @if (diagnosticos.length > 0) {
+              <div class="apartado">
+                <h3>Diagnósticos</h3>
+                <ul class="lista-diagnosticos">
+                  @for (d of diagnosticos; track d.atencionDiagnosticoId) {
+                    <li class="diagnostico">
+                      @if (d.codigoCIE10) {
+                        <span class="codigo">{{ d.codigoCIE10 }}</span>
+                      }
+                      <span class="nombre">{{ d.nombre }}</span>
+
+                      @if (esPrincipal(d)) {
+                        <span class="etiqueta etiqueta-principal">Principal</span>
+                      }
+
+                      @if (d.observaciones) {
+                        <span class="nota">{{ d.observaciones }}</span>
+                      }
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
+          }
+
+          @if (atencion.observaciones) {
+            <div class="apartado">
+              <h3>Observaciones e indicaciones</h3>
+              <p>{{ atencion.observaciones }}</p>
+            </div>
+          }
+
+          @if (estaAbierta(atencion)) {
+            <p class="nota-abierta">Esta consulta sigue en curso; aún no ha sido cerrada.</p>
+          }
+        </li>
+      }
+    </ol>
+  }
+}

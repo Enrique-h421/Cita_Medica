@@ -1,0 +1,124 @@
+<nav class="migas">
+  <button type="button" class="enlace-volver" (click)="cancelar()">← Volver a la agenda</button>
+</nav>
+
+<h1>Agendar cita</h1>
+
+@if (cargando()) {
+  <div class="caja-vacia">Cargando pacientes, médicos y consultorios…</div>
+} @else {
+  <form class="tarjeta" (submit)="$event.preventDefault(); guardar()">
+    @if (error(); as mensaje) {
+      <p class="mensaje-error" role="alert">{{ mensaje }}</p>
+    }
+
+    <div class="campo">
+      <label for="paciente">Paciente</label>
+      <select id="paciente" (change)="cambiarPaciente($event)">
+        <option value="">Seleccione un paciente…</option>
+        @for (paciente of pacientes(); track paciente.pacienteId) {
+          <option [value]="paciente.pacienteId" [selected]="paciente.pacienteId === pacienteId()">
+            {{ paciente.nombreCompleto }} · {{ paciente.codigoPaciente }}
+          </option>
+        }
+      </select>
+    </div>
+
+    <div class="pareja">
+      <div class="campo">
+        <label for="medico">Médico</label>
+        <select id="medico" (change)="cambiarMedico($event)">
+          <option value="">Seleccione un médico…</option>
+          @for (medico of medicos(); track medico.medicoId) {
+            <option [value]="medico.medicoId" [selected]="medico.medicoId === medicoId()">
+              {{ medico.nombreCompleto }}
+            </option>
+          }
+        </select>
+
+        @if (medicoElegido()?.especialidadPrincipalNombre; as especialidad) {
+          <p class="pista">Especialidad: {{ especialidad }}</p>
+        }
+      </div>
+
+      <div class="campo">
+        <label for="consultorio">Consultorio</label>
+        <select id="consultorio" (change)="cambiarConsultorio($event)">
+          <option value="">Sin asignar</option>
+          @for (consultorio of consultorios(); track consultorio.consultorioId) {
+            <option
+              [value]="consultorio.consultorioId"
+              [selected]="consultorio.consultorioId === consultorioId()"
+            >
+              {{ consultorio.descripcion }}
+            </option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="trio">
+      <div class="campo">
+        <label for="fecha">Fecha</label>
+        <input id="fecha" type="date" [value]="fecha()" (change)="cambiarFecha($event)" />
+      </div>
+
+      <div class="campo">
+        <label for="inicio">Hora de inicio</label>
+        <input
+          id="inicio"
+          type="time"
+          [value]="horaInicio()"
+          (change)="cambiarHoraInicio($event)"
+        />
+      </div>
+
+      <div class="campo">
+        <label for="fin">Hora de fin</label>
+        <input id="fin" type="time" [value]="horaFin()" (change)="cambiarHoraFin($event)" />
+        @if (horaFinInvalida()) {
+          <p class="campo-error">Debe ser posterior a la hora de inicio.</p>
+        }
+      </div>
+    </div>
+
+    <div class="campo">
+      <label for="estado">Estado</label>
+      <select id="estado" (change)="cambiarEstado($event)">
+        @for (estado of estados(); track estado.estadoCitaId) {
+          <option [value]="estado.estadoCitaId" [selected]="estado.estadoCitaId === estadoCitaId()">
+            {{ estado.nombre }}
+          </option>
+        }
+      </select>
+    </div>
+
+    <div class="campo">
+      <label for="motivo">Motivo</label>
+      <input
+        id="motivo"
+        type="text"
+        placeholder="Consulta general, control, seguimiento…"
+        [value]="motivo()"
+        (input)="cambiarMotivo($event)"
+      />
+    </div>
+
+    <div class="campo">
+      <label for="observaciones">Observaciones</label>
+      <textarea
+        id="observaciones"
+        placeholder="Indicaciones para recepción o para el médico"
+        [value]="observaciones()"
+        (input)="cambiarObservaciones($event)"
+      ></textarea>
+    </div>
+
+    <footer class="acciones">
+      <button type="button" class="boton-secundario" (click)="cancelar()">Cancelar</button>
+      <button type="submit" class="boton-primario" [disabled]="!puedeGuardar()">
+        {{ guardando() ? 'Agendando…' : 'Agendar cita' }}
+      </button>
+    </footer>
+  </form>
+}

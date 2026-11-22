@@ -1,0 +1,128 @@
+<header class="encabezado">
+  <div>
+    <h1>Agenda de citas</h1>
+    <p class="resumen">
+      @if (cargando()) {
+        Cargando…
+      } @else if (hayFiltroActivo()) {
+        {{ visibles().length }} de {{ citas().length }} citas
+      } @else {
+        {{ citas().length }} {{ citas().length === 1 ? 'cita' : 'citas' }}
+      }
+    </p>
+  </div>
+
+  <div class="acciones-encabezado">
+    <button type="button" class="boton-secundario" (click)="cargar()" [disabled]="cargando()">
+      Actualizar
+    </button>
+
+    @if (auth.puedeAgendar()) {
+      <button type="button" class="boton-primario" (click)="agendar()">Agendar cita</button>
+    }
+  </div>
+</header>
+
+@if (!cargando() && !error() && citas().length > 0) {
+  <div class="filtros">
+    <div class="chips" role="group" aria-label="Filtrar por estado">
+      <button
+        type="button"
+        class="chip"
+        [class.chip-activo]="filtroEstado() === TODAS"
+        (click)="filtrarPor(TODAS)"
+      >
+        Todas
+      </button>
+
+      @for (estado of estadosDisponibles(); track estado.codigo) {
+        <button
+          type="button"
+          class="chip"
+          [class.chip-activo]="filtroEstado() === estado.codigo"
+          (click)="filtrarPor(estado.codigo)"
+        >
+          {{ estado.nombre }}
+        </button>
+      }
+    </div>
+
+    @if (puedeFiltrarPorMedico()) {
+      <label class="interruptor">
+        <input type="checkbox" [checked]="soloMias()" (change)="alternarSoloMias()" />
+        Solo mis citas
+      </label>
+    }
+  </div>
+}
+
+@if (error(); as mensaje) {
+  <div class="mensaje-error" role="alert">
+    {{ mensaje }}
+    <button type="button" class="boton-secundario boton-reintentar" (click)="cargar()">
+      Reintentar
+    </button>
+  </div>
+} @else if (cargando()) {
+  <div class="caja-vacia">Cargando la agenda…</div>
+} @else if (citas().length === 0) {
+  <div class="caja-vacia">
+    <p class="titulo-vacio">No hay citas registradas</p>
+    <p>Cuando se agende la primera cita, aparecerá aquí.</p>
+  </div>
+} @else if (visibles().length === 0) {
+  <div class="caja-vacia">
+    <p class="titulo-vacio">Ninguna cita coincide con el filtro</p>
+    <button type="button" class="boton-secundario" (click)="limpiarFiltros()">
+      Quitar filtros
+    </button>
+  </div>
+} @else {
+  <div class="tabla-marco">
+    <table class="tabla">
+      <caption class="oculto">Listado de citas médicas</caption>
+      <thead>
+        <tr>
+          <th scope="col">Fecha</th>
+          <th scope="col">Hora</th>
+          <th scope="col">Paciente</th>
+          <th scope="col">Médico</th>
+          <th scope="col">Consultorio</th>
+          <th scope="col">Estado</th>
+          <th scope="col"><span class="oculto">Acciones</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (cita of visibles(); track cita.citaId) {
+          <tr>
+            <td class="celda-fecha">{{ fechaCorta(cita.fechaHoraInicio) }}</td>
+            <td class="celda-hora">{{ hora(cita.fechaHoraInicio) }}</td>
+
+            <td>
+              <span class="principal">{{ cita.pacienteNombre ?? 'Paciente #' + cita.pacienteId }}</span>
+              @if (cita.motivo) {
+                <span class="secundario">{{ cita.motivo }}</span>
+              }
+            </td>
+
+            <td>{{ cita.medicoNombre ?? 'Médico #' + cita.medicoId }}</td>
+
+            <td class="celda-suave">{{ cita.consultorioNombre ?? '—' }}</td>
+
+            <td>
+              <span [class]="claseEstado(cita.estadoCodigo)">{{ cita.estadoNombre }}</span>
+            </td>
+
+            <td class="celda-accion">
+              @if (auth.puedeAtender() && sePuedeAtender(cita)) {
+                <button type="button" class="boton-primario boton-atender" (click)="atender(cita)">
+                  Atender
+                </button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

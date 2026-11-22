@@ -1,0 +1,127 @@
+<header class="encabezado">
+  <div>
+    <h1>Pacientes</h1>
+    <p class="resumen">
+      @if (cargando()) {
+        Cargando…
+      } @else if (busqueda().trim() !== '') {
+        {{ visibles().length }} de {{ pacientes().length }} pacientes
+      } @else {
+        {{ pacientes().length }}
+        {{ pacientes().length === 1 ? 'paciente registrado' : 'pacientes registrados' }}
+      }
+    </p>
+  </div>
+
+  <div class="acciones-encabezado">
+    <button type="button" class="boton-secundario" (click)="cargar()" [disabled]="cargando()">
+      Actualizar
+    </button>
+
+    @if (auth.puedeAgendar()) {
+      <button type="button" class="boton-primario" (click)="registrar()">
+        Registrar paciente
+      </button>
+    }
+  </div>
+</header>
+
+@if (!cargando() && !error() && pacientes().length > 0) {
+  <div class="buscador">
+    <input
+      type="search"
+      placeholder="Buscar por nombre, código o documento…"
+      [value]="busqueda()"
+      (input)="buscar($event)"
+      aria-label="Buscar pacientes"
+    />
+  </div>
+}
+
+@if (error(); as mensaje) {
+  <div class="mensaje-error" role="alert">
+    {{ mensaje }}
+    <button type="button" class="boton-secundario boton-reintentar" (click)="cargar()">
+      Reintentar
+    </button>
+  </div>
+} @else if (cargando()) {
+  <div class="caja-vacia">Cargando los pacientes…</div>
+} @else if (pacientes().length === 0) {
+  <div class="caja-vacia">
+    <p class="titulo-vacio">Todavía no hay pacientes</p>
+    <p>Registre el primero para poder agendarle una cita.</p>
+  </div>
+} @else if (visibles().length === 0) {
+  <div class="caja-vacia">
+    <p class="titulo-vacio">Ningún paciente coincide con la búsqueda</p>
+  </div>
+} @else {
+  <div class="tabla-marco">
+    <table class="tabla">
+      <caption class="oculto">Listado de pacientes</caption>
+      <thead>
+        <tr>
+          <th scope="col">Código</th>
+          <th scope="col">Paciente</th>
+          <th scope="col">Edad</th>
+          <th scope="col">Documento</th>
+          <th scope="col">Teléfono</th>
+          <th scope="col">Estado</th>
+          <th scope="col"><span class="oculto">Acciones</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (paciente of visibles(); track paciente.pacienteId) {
+          <tr>
+            <td class="celda-codigo">{{ paciente.codigoPaciente }}</td>
+
+            <td>
+              <span class="principal">{{ paciente.nombreCompleto }}</span>
+              <span class="secundario">
+                {{ paciente.sexo === 'M' ? 'Masculino' : 'Femenino' }}
+                @if (paciente.tipoSangre) {
+                  · {{ paciente.tipoSangre }}
+                }
+              </span>
+            </td>
+
+            <td class="celda-suave">
+              @if (paciente.edad !== null) {
+                {{ paciente.edad }} años
+              } @else {
+                —
+              }
+            </td>
+
+            <td class="celda-suave">
+              {{ paciente.tipoDocumento }} {{ paciente.numeroDocumento }}
+            </td>
+
+            <td class="celda-suave">{{ paciente.telefono ?? '—' }}</td>
+
+            <td>
+              @if (paciente.activo) {
+                <span class="estado estado-exito">Activo</span>
+              } @else {
+                <span class="estado estado-neutro">Inactivo</span>
+              }
+            </td>
+
+            <td class="celda-accion">
+              @if (auth.puedeAtender()) {
+                <button
+                  type="button"
+                  class="boton-secundario boton-ver"
+                  (click)="verExpediente(paciente)"
+                >
+                  Expediente
+                </button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

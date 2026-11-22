@@ -1,0 +1,79 @@
+:host {
+  display: block;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.migas {
+  margin-bottom: 14px;
+}
+
+.enlace-volver {
+  padding: 6px 0;
+  background: none;
+  border: none;
+  color: var(--texto-suave);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.enlace-volver:hover {
+  color: var(--primario);
+}
+
+h1 {
+  margin-bottom: 18px;
+  font-size: 22px;
+}
+
+.tarjeta {
+  padding: 24px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+}
+
+.campo {
+  margin-bottom: 18px;
+}
+
+.pareja {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0 18px;
+}
+
+.trio {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0 18px;
+}
+
+.pista {
+  margin: 6px 0 0;
+  color: var(--primario-oscuro);
+  font-size: 13px;
+}
+
+.acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 20px;
+  border-top: 1px solid var(--borde);
+}
+
+.mensaje-error {
+  margin: 0 0 18px;
+}
+
+.caja-vacia {
+  padding: 48px 24px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  color: var(--texto-suave);
+  text-align: center;
+}
