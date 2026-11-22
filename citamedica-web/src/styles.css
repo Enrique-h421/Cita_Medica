@@ -1,28 +1,41 @@
 /* ===========================================================================
    CitaMedica — estilos globales
    ---------------------------------------------------------------------------
-   Todo el color y el espaciado del sistema sale de las variables de aquí
-   abajo. Si algún día hay que cambiar el verde por el azul de otra clínica,
-   se cambia en un solo lugar y cambia la aplicación entera.
+   Aquí vive todo lo que se repite: el color, el ritmo del espaciado, la
+   tipografía y los componentes que usan varias pantallas (encabezado, tabla,
+   tarjeta, estados, campos). Las hojas de cada pantalla solo traen lo que es
+   suyo y nada más.
+
+   Antes cada pantalla llevaba su propia copia de la tabla y de los estados.
+   Eran unas cuatrocientas líneas repetidas cuatro veces, y bastaba tocar una
+   para que esa pantalla quedara distinta de las demás.
    =========================================================================== */
 
 :root {
-  /* Identidad */
+  /* ----------------------------- Identidad ------------------------------ */
+  /* Todo es el mismo verde, en cinco intensidades. */
   --primario: #0f766e;
   --primario-oscuro: #115e59;
   --primario-claro: #ccfbf1;
 
-  /* Superficies */
+  /* Los dos más oscuros existen para fondos grandes, como el panel del
+     login: el mismo verde bajado de luz, no un color aparte. */
+  --primario-profundo: #0b3b38;
+  --primario-noche: #052b28;
+
+  /* ----------------------------- Superficies ---------------------------- */
   --fondo: #f1f5f9;
   --superficie: #ffffff;
+  --fondo-suave: #f8fafc; /* cabeceras de tabla y filas al pasar el ratón */
   --borde: #e2e8f0;
+  --borde-fuerte: #cbd5e1;
 
-  /* Texto */
+  /* -------------------------------- Texto ------------------------------- */
   --texto: #0f172a;
   --texto-suave: #64748b;
   --texto-inverso: #ffffff;
 
-  /* Semáforo de estados */
+  /* -------------------------- Semáforo de estados ----------------------- */
   --exito: #15803d;
   --exito-suave: #dcfce7;
   --aviso: #b45309;
@@ -34,11 +47,24 @@
   --neutro: #475569;
   --neutro-suave: #e2e8f0;
 
-  /* Medidas */
+  /* ------------------------------- Medidas ------------------------------ */
+  /* Un solo ritmo de espaciado. Si todo sale de estos seis valores, las
+     pantallas se alinean entre sí aunque las haya escrito otra persona. */
+  --e1: 4px;
+  --e2: 8px;
+  --e3: 12px;
+  --e4: 16px;
+  --e5: 24px;
+  --e6: 32px;
+
   --radio: 10px;
   --radio-chico: 6px;
-  --sombra: 0 1px 2px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.06);
-  --sombra-alta: 0 10px 30px rgba(15, 23, 42, 0.12);
+
+  /* La sombra se reserva para lo que de verdad flota sobre la página: un
+     desplegable, un diálogo. Las tarjetas y las tablas se separan del fondo
+     con un borde de un píxel, que se ve más nítido y menos genérico. */
+  --sombra: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --sombra-alta: 0 12px 32px rgba(15, 23, 42, 0.14);
 }
 
 * {
@@ -56,22 +82,86 @@ body {
   color: var(--texto);
   font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
   font-size: 15px;
-  line-height: 1.55;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
+::selection {
+  background: var(--primario-claro);
+  color: var(--primario-oscuro);
+}
+
+/* ------------------------------ Tipografía -------------------------------- */
+
+/* Una sola escala para toda la aplicación. El interletrado se cierra a medida
+   que el texto crece, que es como se compone un titular. */
 h1,
 h2,
 h3 {
   margin: 0;
   font-weight: 600;
-  letter-spacing: -0.01em;
 }
 
-/* ------------------------------ Formularios ------------------------------ */
+h1 {
+  font-size: 24px;
+  letter-spacing: -0.021em;
+}
+
+h2 {
+  font-size: 18px;
+  letter-spacing: -0.014em;
+}
+
+h3 {
+  font-size: 15px;
+  letter-spacing: -0.006em;
+}
+
+/* --------------------------- Encabezado de página ------------------------- */
+
+.encabezado {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--e4);
+  margin-bottom: var(--e5);
+}
+
+.resumen {
+  margin: var(--e1) 0 0;
+  color: var(--texto-suave);
+  font-size: 14px;
+}
+
+.acciones-encabezado {
+  display: flex;
+  gap: var(--e2);
+  flex: none;
+}
+
+/* Migas de pan: el camino de vuelta, discreto y siempre en el mismo sitio. */
+.migas {
+  margin-bottom: var(--e3);
+}
+
+.enlace-volver {
+  padding: var(--e1) 0;
+  background: none;
+  border: none;
+  color: var(--texto-suave);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.enlace-volver:hover {
+  color: var(--primario);
+}
+
+/* ------------------------------ Formularios ------------------------------- */
 
 label {
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: var(--e1);
   font-size: 13px;
   font-weight: 600;
   color: var(--texto);
@@ -82,7 +172,7 @@ textarea,
 select {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid var(--borde);
+  border: 1px solid var(--borde-fuerte);
   border-radius: var(--radio-chico);
   background: var(--superficie);
   color: var(--texto);
@@ -90,9 +180,40 @@ select {
   font-size: 15px;
 }
 
+input:hover:not(:disabled),
+textarea:hover:not(:disabled),
+select:hover:not(:disabled) {
+  border-color: var(--texto-suave);
+}
+
+input:disabled,
+textarea:disabled,
+select:disabled {
+  background: var(--fondo-suave);
+  color: var(--texto-suave);
+}
+
 textarea {
   min-height: 90px;
+  line-height: 1.55;
   resize: vertical;
+}
+
+.campo {
+  margin-bottom: var(--e4);
+}
+
+/* Dos y tres campos por fila. Se reacomodan solos cuando no caben. */
+.pareja {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0 var(--e4);
+}
+
+.trio {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0 var(--e4);
 }
 
 input:focus-visible,
@@ -106,7 +227,7 @@ a:focus-visible {
   outline-offset: 2px;
 }
 
-/* ------------------------------- Botones --------------------------------- */
+/* -------------------------------- Botones --------------------------------- */
 
 button {
   font-family: inherit;
@@ -114,12 +235,12 @@ button {
   font-weight: 600;
   border: none;
   border-radius: var(--radio-chico);
-  padding: 10px 18px;
+  padding: 9px 16px;
   cursor: pointer;
 }
 
 button:disabled {
-  opacity: 0.55;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
@@ -135,17 +256,229 @@ button:disabled {
 .boton-secundario {
   background: var(--superficie);
   color: var(--texto);
-  border: 1px solid var(--borde);
+  border: 1px solid var(--borde-fuerte);
 }
 
 .boton-secundario:hover:not(:disabled) {
-  background: var(--fondo);
+  background: var(--fondo-suave);
+  border-color: var(--texto-suave);
 }
 
-/* ------------------------------- Mensajes -------------------------------- */
+/* Botones dentro de una fila o de un encabezado: un punto más pequeños, para
+   que no compitan con el contenido. */
+.boton-reintentar,
+.boton-ver,
+.boton-atender {
+  padding: 7px 14px;
+  font-size: 14px;
+}
+
+/* --------------------------------- Tarjeta -------------------------------- */
+
+.tarjeta {
+  padding: var(--e5);
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+}
+
+/* Pie de formulario: la acción principal siempre abajo a la derecha. */
+.acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--e3);
+  margin-top: var(--e2);
+  padding-top: var(--e5);
+  border-top: 1px solid var(--borde);
+}
+
+/* ---------------------------------- Tablas -------------------------------- */
+
+.tabla-marco {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  overflow: hidden;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* La cabecera no va en mayúsculas: en una tabla de datos el peso y el color
+   bastan para separarla, y las versalitas forzadas cuestan legibilidad. */
+.tabla thead th {
+  padding: var(--e3) var(--e4);
+  background: var(--fondo-suave);
+  border-bottom: 1px solid var(--borde);
+  color: var(--texto-suave);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.tabla tbody td {
+  padding: var(--e3) var(--e4);
+  border-bottom: 1px solid var(--borde);
+  vertical-align: middle;
+}
+
+.tabla tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.tabla tbody tr:hover {
+  background: var(--fondo-suave);
+}
+
+/* Las cifras en tabla van en versión tabular: así los dígitos ocupan todos lo
+   mismo y las columnas quedan alineadas de una fila a la siguiente. */
+.tabla td {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Dato principal de la fila y su matiz debajo. */
+.principal {
+  display: block;
+  font-weight: 600;
+}
+
+.secundario {
+  display: block;
+  margin-top: 1px;
+  color: var(--texto-suave);
+  font-size: 13px;
+}
+
+.celda-suave {
+  color: var(--texto-suave);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.celda-accion {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Códigos e identificadores: destacados, porque son lo que la gente busca
+   cuando recorre una tabla con el dedo. */
+.celda-codigo,
+.celda-numero {
+  color: var(--primario-oscuro);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Un filo de color al inicio de la fila, del mismo color que su distintivo.
+   Deja leer el estado de una lista entera de un vistazo, sin recorrer la
+   columna Estado. Va como sombra interior y no como borde para que no se
+   pierda al pasar el ratón por encima ni corte la curva de la esquina. */
+.tabla tbody tr[data-acento] td:first-child {
+  box-shadow: inset 3px 0 0 var(--neutro);
+}
+
+.tabla tbody tr[data-acento='exito'] td:first-child {
+  box-shadow: inset 3px 0 0 var(--exito);
+}
+
+.tabla tbody tr[data-acento='info'] td:first-child {
+  box-shadow: inset 3px 0 0 var(--info);
+}
+
+.tabla tbody tr[data-acento='aviso'] td:first-child {
+  box-shadow: inset 3px 0 0 var(--aviso);
+}
+
+.tabla tbody tr[data-acento='error'] td:first-child {
+  box-shadow: inset 3px 0 0 var(--error);
+}
+
+.tabla tbody tr[data-acento='primario'] td:first-child {
+  box-shadow: inset 3px 0 0 var(--primario);
+}
+
+/* -------------------------- Distintivos de estado ------------------------- */
+
+.estado {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.estado-exito {
+  background: var(--exito-suave);
+  color: var(--exito);
+}
+
+.estado-info {
+  background: var(--info-suave);
+  color: var(--info);
+}
+
+.estado-aviso {
+  background: var(--aviso-suave);
+  color: var(--aviso);
+}
+
+.estado-error {
+  background: var(--error-suave);
+  color: var(--error);
+}
+
+.estado-neutro {
+  background: var(--neutro-suave);
+  color: var(--neutro);
+}
+
+/* Etiqueta de matiz, más pequeña que un estado: el tipo de un diagnóstico,
+   la categoría de algo. */
+.etiqueta {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.etiqueta-principal {
+  background: var(--info-suave);
+  color: var(--info);
+}
+
+.etiqueta-secundario {
+  background: var(--neutro-suave);
+  color: var(--neutro);
+}
+
+/* Código CIE-10 y afines. Va en monoespaciada para que las columnas de letras
+   y números queden alineadas de una línea a otra. */
+.codigo {
+  padding: 2px 8px;
+  border-radius: var(--radio-chico);
+  background: var(--primario-claro);
+  color: var(--primario-oscuro);
+  font-family: "Cascadia Mono", Consolas, monospace;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* --------------------------------- Mensajes ------------------------------- */
 
 .mensaje-error {
-  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e4);
+  flex-wrap: wrap;
+  padding: var(--e3) var(--e4);
   border-radius: var(--radio-chico);
   background: var(--error-suave);
   color: var(--error);
@@ -153,7 +486,57 @@ button:disabled {
 }
 
 .campo-error {
-  margin-top: 6px;
+  margin-top: var(--e1);
   color: var(--error);
   font-size: 13px;
+}
+
+/* Una pantalla vacía es una invitación a actuar, no un hueco: por eso lleva
+   un titular que dice qué falta y una línea que dice cómo llenarlo. */
+.caja-vacia {
+  padding: 56px var(--e5);
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  color: var(--texto-suave);
+  text-align: center;
+}
+
+.caja-vacia p {
+  margin: 0;
+}
+
+.titulo-vacio {
+  margin: 0 0 var(--e1);
+  color: var(--texto);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.caja-vacia button {
+  margin-top: var(--e4);
+}
+
+/* ---------------------------------- Varios -------------------------------- */
+
+/* Texto solo para lectores de pantalla. */
+.oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

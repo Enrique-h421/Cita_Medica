@@ -1,58 +1,256 @@
+/* ===========================================================================
+   Login — pantalla partida en dos.
+
+   Izquierda: la marca y el mensaje, sobre una retícula de agenda dibujada con
+   CSS. No se usa una fotografía a propósito: no hay archivo que se pierda ni
+   descarga que falle sin internet, y una retícula de horas dice de qué se
+   trata el sistema mejor que una foto de stock de un hospital.
+
+   Derecha: el formulario, sobre blanco, para que el contraste lleve la vista
+   directo a donde hay que escribir.
+   =========================================================================== */
+
 .pantalla {
-  min-height: 100vh;
   display: grid;
-  place-items: center;
-  padding: 24px;
-  /* Un degradado muy suave para que el fondo no sea una pared plana. */
-  background: linear-gradient(160deg, #0f766e 0%, #134e4a 55%, #0f172a 100%);
+  grid-template-columns: 58fr 42fr;
+  min-height: 100vh;
 }
 
-.tarjeta {
-  width: 100%;
-  max-width: 380px;
-  padding: 32px;
-  background: var(--superficie);
-  border-radius: var(--radio);
-  box-shadow: var(--sombra-alta);
+/* --------------------------- Panel de marca ------------------------------ */
+
+.panel-marca {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  /* El mensaje va al centro, no abajo. Con el logo arriba y el texto pegado
+     al borde inferior quedaba un vacío enorme en medio de la pantalla. */
+  justify-content: center;
+  overflow: hidden;
+  padding: 44px;
+  /* El mismo verde del sistema, bajando de luz. Sale todo de styles.css, así
+     que si la clínica cambia de color, esta pantalla cambia con ella. */
+  background: linear-gradient(
+    155deg,
+    var(--primario) 0%,
+    var(--primario-profundo) 52%,
+    var(--primario-noche) 100%
+  );
+  color: var(--texto-inverso);
+}
+
+/* Las líneas de hora, atenuadas en los dos extremos para que no choquen con
+   el borde del panel. Recorren casi todo el alto: son el fondo, no un
+   adorno en una esquina. */
+.reticula {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.07) 0 1px,
+    transparent 1px 68px
+  );
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 10%, #000 84%, transparent 97%);
+  mask-image: linear-gradient(to bottom, transparent, #000 10%, #000 84%, transparent 97%);
+}
+
+/* Tres citas sobre la retícula, en horas y duraciones distintas, como se ve
+   una mañana real: no una cuadrícula perfecta. Dos arriba y una abajo, con
+   el mensaje respirando entre ellas: así el panel se llena de arriba abajo
+   en vez de amontonarse en una mitad. */
+.cita {
+  position: absolute;
+  border-radius: 7px;
+  border-left: 3px solid color-mix(in srgb, var(--primario-claro) 55%, transparent);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.cita-1 {
+  top: 12%;
+  left: 11%;
+  width: 30%;
+  height: 54px;
+}
+
+.cita-2 {
+  top: 23%;
+  left: 23%;
+  width: 36%;
+  height: 86px;
+}
+
+.cita-3 {
+  top: 76%;
+  left: 14%;
+  width: 25%;
+  height: 46px;
 }
 
 .marca {
+  position: absolute;
+  top: 44px;
+  left: 44px;
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin-bottom: 28px;
+  gap: 11px;
 }
 
 .logo {
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: 34px;
+  height: 34px;
   flex: none;
-  border-radius: 12px;
-  background: var(--primario);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.14);
   color: var(--texto-inverso);
-  font-size: 26px;
+}
+
+.nombre-marca {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.mensaje {
+  position: relative;
+}
+
+/* El ancho se limita sobre el titular y no sobre el bloque: la unidad ch se
+   mide con la letra del elemento donde se escribe, y en el bloque esa letra
+   es la del párrafo, que es mucho más pequeña. Puesto arriba, el titular
+   quedaba partido en cuatro líneas. */
+.mensaje h1 {
+  max-width: 20ch;
+  font-size: clamp(32px, 3.6vw, 46px);
   font-weight: 700;
-  line-height: 1;
+  line-height: 1.06;
+  letter-spacing: -0.028em;
 }
 
-h1 {
-  font-size: 21px;
+.mensaje p {
+  margin: 18px 0 0;
+  max-width: 44ch;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 15px;
+  line-height: 1.6;
 }
 
-.subtitulo {
-  margin: 2px 0 0;
+/* -------------------------- Panel de acceso ------------------------------ */
+
+.panel-acceso {
+  display: grid;
+  place-items: center;
+  padding: 44px;
+  background: var(--superficie);
+}
+
+.formulario {
+  width: 100%;
+  max-width: 370px;
+}
+
+.formulario h2 {
+  font-size: 27px;
+  font-weight: 700;
+  letter-spacing: -0.022em;
+}
+
+.bajada {
+  margin: 8px 0 30px;
   color: var(--texto-suave);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .campo {
   margin-bottom: 18px;
 }
 
-.boton-ancho {
+.campo input {
+  padding: 12px 14px;
+}
+
+/* El ojito va dentro del campo, así que la contraseña necesita sitio a la
+   derecha para que el texto no se le meta debajo. */
+.campo-con-boton {
+  position: relative;
+}
+
+.campo-con-boton input {
+  padding-right: 46px;
+}
+
+.ver-clave {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  background: none;
+  color: var(--texto-suave);
+}
+
+.ver-clave:hover {
+  color: var(--texto);
+}
+
+.boton-entrar {
   width: 100%;
-  margin-top: 6px;
-  padding: 12px;
+  margin-top: 8px;
+  padding: 13px;
+  font-size: 15px;
+}
+
+.mensaje-error {
+  margin-bottom: 18px;
+}
+
+.pie {
+  margin: 26px 0 0;
+  color: var(--texto-suave);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ------------------------------ Pantalla chica --------------------------- */
+
+/* Debajo de 900px el partido no cabe: la marca pasa a ser una banda de arriba
+   y el formulario se queda con toda la pantalla, que es lo que importa. */
+@media (max-width: 900px) {
+  .pantalla {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .panel-marca {
+    padding: 26px 24px 30px;
+    gap: 22px;
+  }
+
+  /* En la banda de arriba el logo vuelve al flujo, encima del titular. */
+  .marca {
+    position: static;
+  }
+
+  .reticula,
+  .cita {
+    display: none;
+  }
+
+  .mensaje h1 {
+    font-size: 27px;
+  }
+
+  .mensaje p {
+    margin-top: 10px;
+    font-size: 14px;
+  }
+
+  .panel-acceso {
+    padding: 34px 24px 44px;
+    align-items: start;
+  }
 }

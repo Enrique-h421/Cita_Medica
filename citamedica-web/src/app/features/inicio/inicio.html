@@ -1,0 +1,115 @@
+<header class="bienvenida">
+  <h1>{{ saludo }}, {{ nombre() }}</h1>
+  <p class="fecha">{{ fechaDeHoy }}</p>
+</header>
+
+@if (error(); as mensaje) {
+  <div class="mensaje-error" role="alert">
+    {{ mensaje }}
+    <button type="button" class="boton-secundario boton-reintentar" (click)="cargar()">
+      Reintentar
+    </button>
+  </div>
+} @else if (cargando()) {
+  <div class="caja-vacia">Cargando la jornada…</div>
+} @else {
+  <section class="jornada">
+    <div class="jornada-cabecera">
+      <h2>La jornada de hoy</h2>
+
+      @if (enPie() > 0) {
+        <p class="avance-texto">
+          <strong>{{ atendidas() }}</strong> de {{ enPie() }}
+          {{ enPie() === 1 ? 'cita atendida' : 'citas atendidas' }}
+        </p>
+      }
+    </div>
+
+    @if (citasHoy().length === 0) {
+      <p class="sin-jornada">
+        No hay citas para hoy. Cuando se agende una, aparecerá aquí.
+      </p>
+    } @else {
+      <div
+        class="barra"
+        role="progressbar"
+        [attr.aria-valuenow]="avance()"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        [attr.aria-label]="'Avance de la jornada: ' + avance() + ' por ciento'"
+      >
+        <span class="barra-llena" [style.width.%]="avance()"></span>
+      </div>
+
+      <ul class="desglose">
+        <li><span class="punto punto-exito"></span>{{ atendidas() }} atendidas</li>
+        <li><span class="punto punto-info"></span>{{ confirmadas() }} confirmadas</li>
+        <li><span class="punto punto-aviso"></span>{{ pendientes() }} pendientes</li>
+        @if (noVinieron() > 0) {
+          <li><span class="punto punto-neutro"></span>{{ noVinieron() }} sin asistir</li>
+        }
+      </ul>
+    }
+  </section>
+
+  <div class="rejilla">
+    <section class="panel">
+      <h2>Lo que sigue</h2>
+
+      @if (proximas().length === 0) {
+        <p class="vacio-panel">
+          @if (citasHoy().length === 0) {
+            Nada agendado para hoy.
+          } @else {
+            Todas las citas de hoy ya se atendieron.
+          }
+        </p>
+      } @else {
+        <ul class="proximas">
+          @for (cita of proximas(); track cita.citaId) {
+            <li [attr.data-acento]="acento(cita.estadoCodigo)">
+              <span class="hora-cita">{{ hora(cita.fechaHoraInicio) }}</span>
+              <span class="quien">
+                <span class="principal">
+                  {{ cita.pacienteNombre ?? 'Paciente #' + cita.pacienteId }}
+                </span>
+                @if (!auth.medicoId()) {
+                  <span class="secundario">
+                    {{ cita.medicoNombre ?? 'Médico #' + cita.medicoId }}
+                  </span>
+                }
+              </span>
+              <span class="donde">{{ cita.consultorioNombre ?? '—' }}</span>
+            </li>
+          }
+        </ul>
+      }
+
+      <a routerLink="/agenda" class="enlace-panel">Ver la agenda completa</a>
+    </section>
+
+    <section class="panel">
+      <h2>La clínica</h2>
+
+      <dl class="cifras">
+        <div class="cifra">
+          <dt>Pacientes registrados</dt>
+          <dd>{{ totalPacientes() ?? '—' }}</dd>
+        </div>
+
+        @if (auth.puedeAtender()) {
+          <div class="cifra">
+            <dt>Expedientes abiertos</dt>
+            <dd>{{ totalExpedientes() ?? '—' }}</dd>
+          </div>
+        }
+      </dl>
+
+      @if (auth.puedeAgendar()) {
+        <a routerLink="/citas/nueva" class="enlace-panel">Agendar una cita</a>
+      } @else {
+        <a routerLink="/expedientes" class="enlace-panel">Buscar un expediente</a>
+      }
+    </section>
+  </div>
+}

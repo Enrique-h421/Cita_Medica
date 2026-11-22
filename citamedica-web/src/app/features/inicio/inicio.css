@@ -1,0 +1,275 @@
+/* ===========================================================================
+   Inicio — en qué va el día.
+
+   Lo primero que se ve al entrar. No es un tablero de métricas: es la
+   pregunta que se hace cualquiera al llegar a una clínica por la mañana,
+   "¿cómo vamos hoy?", contestada en una línea.
+   =========================================================================== */
+
+.bienvenida {
+  margin-bottom: var(--e5);
+}
+
+.fecha {
+  margin: var(--e1) 0 0;
+  color: var(--texto-suave);
+  font-size: 14px;
+}
+
+/* Intl devuelve la fecha en minúscula ("domingo, 22 de noviembre"). Se sube
+   solo la primera letra: capitalize subiría también la "de" y la "noviembre",
+   que en español van en minúscula. */
+.fecha::first-letter {
+  text-transform: uppercase;
+}
+
+/* -------------------------------- Jornada --------------------------------- */
+
+.jornada {
+  padding: var(--e5);
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+}
+
+.jornada-cabecera {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--e4);
+  flex-wrap: wrap;
+  margin-bottom: var(--e4);
+}
+
+.avance-texto {
+  margin: 0;
+  color: var(--texto-suave);
+  font-size: 15px;
+}
+
+.avance-texto strong {
+  color: var(--texto);
+  font-size: 19px;
+  font-variant-numeric: tabular-nums;
+}
+
+.sin-jornada {
+  margin: 0;
+  color: var(--texto-suave);
+  font-size: 14px;
+}
+
+/* La barra es el único elemento con peso visual de la pantalla, y es el que
+   contesta la pregunta sin leer un número. */
+.barra {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--neutro-suave);
+  overflow: hidden;
+}
+
+.barra-llena {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--primario);
+  transition: width 0.4s ease;
+}
+
+.desglose {
+  display: flex;
+  gap: var(--e5);
+  flex-wrap: wrap;
+  margin: var(--e4) 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--texto-suave);
+  font-size: 14px;
+}
+
+.desglose li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+/* Un punto del color del estado, para enlazar esta lista con los distintivos
+   de la agenda sin repetir las pastillas, que aquí pesarían demasiado. */
+.punto {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.punto-exito {
+  background: var(--exito);
+}
+
+.punto-info {
+  background: var(--info);
+}
+
+.punto-aviso {
+  background: var(--aviso);
+}
+
+.punto-neutro {
+  background: var(--neutro);
+}
+
+/* -------------------------------- Paneles --------------------------------- */
+
+.rejilla {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: var(--e3);
+  margin-top: var(--e3);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  padding: var(--e5);
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+}
+
+.panel h2 {
+  margin-bottom: var(--e4);
+  font-size: 16px;
+}
+
+.vacio-panel {
+  flex: 1;
+  margin: 0;
+  color: var(--texto-suave);
+  font-size: 14px;
+}
+
+/* flex: 1 empuja el enlace al fondo, así los dos paneles lo alinean abajo
+   aunque tengan distinta cantidad de contenido. */
+.proximas {
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.proximas li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--e3);
+  padding: var(--e2) 0;
+  border-bottom: 1px solid var(--borde);
+}
+
+/* El mismo filo de la agenda, para que las dos pantallas hablen igual. */
+.proximas li[data-acento] {
+  padding-left: var(--e3);
+  box-shadow: inset 3px 0 0 var(--neutro);
+}
+
+.proximas li[data-acento='exito'] {
+  box-shadow: inset 3px 0 0 var(--exito);
+}
+
+.proximas li[data-acento='info'] {
+  box-shadow: inset 3px 0 0 var(--info);
+}
+
+.proximas li[data-acento='aviso'] {
+  box-shadow: inset 3px 0 0 var(--aviso);
+}
+
+.proximas li:first-child {
+  padding-top: var(--e2);
+}
+
+.proximas li:last-child {
+  border-bottom: none;
+}
+
+.hora-cita {
+  flex: none;
+  min-width: 76px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.quien {
+  flex: 1;
+  min-width: 0;
+}
+
+.donde {
+  flex: none;
+  color: var(--texto-suave);
+  font-size: 13px;
+}
+
+/* --------------------------------- Cifras --------------------------------- */
+
+.cifras {
+  flex: 1;
+  margin: 0;
+}
+
+.cifra {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--e3);
+  padding: var(--e2) 0;
+  border-bottom: 1px solid var(--borde);
+}
+
+.cifra:first-child {
+  padding-top: 0;
+}
+
+.cifra:last-child {
+  border-bottom: none;
+}
+
+.cifra dt {
+  color: var(--texto-suave);
+  font-size: 14px;
+}
+
+.cifra dd {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.015em;
+}
+
+/* -------------------------------- Enlaces --------------------------------- */
+
+.enlace-panel {
+  margin-top: var(--e4);
+  padding-top: var(--e3);
+  border-top: 1px solid var(--borde);
+  color: var(--primario-oscuro);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.enlace-panel:hover {
+  text-decoration: underline;
+}
+
+/* ----------------------------- Pantalla chica ----------------------------- */
+
+@media (max-width: 860px) {
+  .rejilla {
+    grid-template-columns: 1fr;
+  }
+
+  .donde {
+    display: none;
+  }
+}

@@ -1,33 +1,7 @@
-/* ============================================================================
-   05_Diagnosticos.sql   —   CitaMedica / ClinicaDB
-   ----------------------------------------------------------------------------
-   Siembra el catálogo de diagnósticos con los códigos CIE-10 más usados en
-   consulta general.
-
-   La tabla Diagnosticos viene vacía en la base que entregó el ingeniero, así
-   que sin esto el médico no tiene nada que escoger al cerrar una consulta.
-   Los códigos son los de la CIE-10 de la OMS, que es la clasificación con la
-   que se codifica en las clínicas; son estándar, no inventados.
-
-   Este script agrega los que falten y NO toca los que ya existen. Se puede
-   correr varias veces sin duplicar nada.
-
-   ****************************************************************************
-   OJO: en SSMS, si hay texto seleccionado se ejecuta SOLO lo seleccionado.
-   No selecciones nada: hacé clic en cualquier parte del archivo y dale
-   Execute (F5) para que corran los tres pasos.
-   ****************************************************************************
-   ============================================================================ */
 
 USE ClinicaDB;
 GO
 
-/* ---------------------------------------------------------------------------
-   PASO 1 — Esquema actual de la tabla.
-   No cambia nada, solo muestra las columnas. Si el PASO 2 falla porque la
-   tabla tiene una columna obligatoria que este script no conoce, mandame lo
-   que salga aquí.
-   --------------------------------------------------------------------------- */
 SELECT
     c.column_id                                          AS Orden,
     c.name                                               AS Columna,
@@ -46,10 +20,7 @@ WHERE c.object_id = OBJECT_ID('dbo.Diagnosticos')
 ORDER BY c.column_id;
 GO
 
-/* ---------------------------------------------------------------------------
-   PASO 2 — Insertar los diagnósticos que falten.
-   El código CIE-10 es la llave lógica: si ya existe, se deja como está.
-   --------------------------------------------------------------------------- */
+ 
 DECLARE @diagnosticos TABLE (
     CodigoCIE10 varchar(20),
     Nombre      nvarchar(300),
@@ -115,7 +86,7 @@ INSERT INTO @diagnosticos (CodigoCIE10, Nombre, Descripcion) VALUES
 
 IF COLUMNPROPERTY(OBJECT_ID('dbo.Diagnosticos'), 'DiagnosticoID', 'IsIdentity') = 1
 BEGIN
-    -- El Id lo pone SQL Server.
+   
     INSERT INTO dbo.Diagnosticos (CodigoCIE10, Nombre, Descripcion, Activo)
     SELECT d.CodigoCIE10, d.Nombre, d.Descripcion, 1
     FROM @diagnosticos d
@@ -125,8 +96,7 @@ BEGIN
 END
 ELSE
 BEGIN
-    -- La tabla no es identity: hay que calcular el Id a mano, siguiendo
-    -- después del último que ya existe.
+ 
     DECLARE @ultimo int = ISNULL((SELECT MAX(DiagnosticoID) FROM dbo.Diagnosticos), 0);
 
     INSERT INTO dbo.Diagnosticos (DiagnosticoID, CodigoCIE10, Nombre, Descripcion, Activo)
@@ -143,11 +113,6 @@ BEGIN
 END
 GO
 
-/* ---------------------------------------------------------------------------
-   PASO 3 — Verificación.
-   Deben aparecer 38 diagnósticos activos, y cuántas atenciones usan cada uno
-   (al inicio, cero en todos).
-   --------------------------------------------------------------------------- */
 SELECT COUNT(*) AS TotalDiagnosticos FROM dbo.Diagnosticos;
 GO
 

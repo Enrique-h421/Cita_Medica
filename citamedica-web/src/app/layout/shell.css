@@ -1,30 +1,55 @@
-.barra {
+/* ===========================================================================
+   El marco de la aplicación: menú lateral fijo + contenido a la derecha.
+
+   El menú va al lado y no arriba porque las secciones crecen hacia abajo sin
+   pelearse por el ancho, y porque deja la franja superior entera para el
+   contenido, que es lo que la gente viene a ver.
+   =========================================================================== */
+
+.marco {
+  display: grid;
+  grid-template-columns: 236px 1fr;
+  min-height: 100vh;
+}
+
+/* --------------------------------- Lateral -------------------------------- */
+
+.lateral {
   display: flex;
-  align-items: center;
-  gap: 32px;
-  padding: 0 24px;
-  height: 60px;
+  flex-direction: column;
+  gap: 26px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  padding: 20px 14px;
   background: var(--superficie);
-  border-bottom: 1px solid var(--borde);
+  border-right: 1px solid var(--borde);
 }
 
 .marca {
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 0 6px;
 }
 
 .logo {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
-  background: var(--primario);
-  color: var(--texto-inverso);
-  font-size: 19px;
-  font-weight: 700;
-  line-height: 1;
+  flex: none;
+}
+
+.logo .placa {
+  fill: var(--primario);
+}
+
+.logo .arco {
+  fill: none;
+  stroke: var(--superficie);
+  stroke-width: 11;
+  stroke-linecap: round;
+}
+
+.logo .cruz {
+  fill: var(--superficie);
 }
 
 .nombre-sistema {
@@ -32,19 +57,30 @@
   font-size: 16px;
 }
 
+/* ---------------------------------- Menú ---------------------------------- */
+
+/* flex: 1 empuja el bloque de sesión hasta abajo del todo. */
 .menu {
   display: flex;
-  gap: 4px;
+  flex-direction: column;
+  gap: 2px;
   flex: 1;
 }
 
 .menu a {
-  padding: 7px 14px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 12px;
   border-radius: var(--radio-chico);
   color: var(--texto-suave);
   font-size: 14px;
   font-weight: 600;
   text-decoration: none;
+}
+
+.menu a svg {
+  flex: none;
 }
 
 .menu a:hover {
@@ -57,17 +93,21 @@
   color: var(--primario-oscuro);
 }
 
+/* --------------------------------- Sesión --------------------------------- */
+
 .sesion {
   display: flex;
-  align-items: center;
-  gap: 14px;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--borde);
 }
 
 .identidad {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  line-height: 1.25;
+  padding: 0 6px;
+  line-height: 1.3;
 }
 
 .usuario {
@@ -81,12 +121,66 @@
 }
 
 .boton-salir {
-  padding: 7px 14px;
+  padding: 8px 14px;
   font-size: 14px;
 }
 
+/* -------------------------------- Contenido ------------------------------- */
+
 .contenido {
-  padding: 24px;
+  padding: 28px;
   max-width: 1200px;
   margin: 0 auto;
+  width: 100%;
+}
+
+/* ------------------------------ Pantalla chica ---------------------------- */
+
+/* Debajo de 900px una columna fija de 236px se come la pantalla, así que el
+   menú vuelve a ser una barra arriba. Las secciones son pocas y caben; si no
+   caben, la barra se desplaza de lado. */
+@media (max-width: 900px) {
+  .marco {
+    grid-template-columns: 1fr;
+  }
+
+  .lateral {
+    position: static;
+    height: auto;
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 14px;
+    border-right: none;
+    border-bottom: 1px solid var(--borde);
+  }
+
+  .nombre-sistema {
+    display: none;
+  }
+
+  .menu {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .menu a {
+    white-space: nowrap;
+  }
+
+  .sesion {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    padding-top: 0;
+    border-top: none;
+  }
+
+  .identidad {
+    display: none;
+  }
+
+  .contenido {
+    padding: 20px 14px;
+  }
 }

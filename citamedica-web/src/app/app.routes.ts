@@ -23,6 +23,12 @@ export const routes: Routes = [
     loadComponent: () => import('./layout/shell').then((m) => m.Shell),
     children: [
       {
+        // La pantalla de bienvenida: en qué va el día. Es la primera que se
+        // ve al entrar, así que va de primera también aquí.
+        path: 'inicio',
+        loadComponent: () => import('./features/inicio/inicio').then((m) => m.Inicio),
+      },
+      {
         path: 'agenda',
         loadComponent: () => import('./features/agenda/agenda').then((m) => m.Agenda),
       },
@@ -77,7 +83,7 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/usuarios/usuarios').then((m) => m.UsuariosLista),
       },
-      { path: '', pathMatch: 'full', redirectTo: 'agenda' },
+      { path: '', pathMatch: 'full', redirectTo: 'inicio' },
     ],
   },
   { path: '**', redirectTo: '' },

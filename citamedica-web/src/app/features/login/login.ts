@@ -25,10 +25,20 @@ export class Login {
   protected readonly enviando = signal(false);
   protected readonly error = signal<string | null>(null);
 
+  /**
+   * Si la contraseña se ve en claro. Apagado por defecto: en una recepción
+   * siempre hay alguien mirando la pantalla.
+   */
+  protected readonly mostrarClave = signal(false);
+
   protected readonly puedeEntrar = computed(() => {
     const { nombreUsuario, password } = this.modelo();
     return nombreUsuario.trim().length > 0 && password.length > 0 && !this.enviando();
   });
+
+  protected alternarClave(): void {
+    this.mostrarClave.update((visible) => !visible);
+  }
 
   protected async entrar(): Promise<void> {
     if (!this.puedeEntrar()) {
@@ -40,7 +50,7 @@ export class Login {
 
     try {
       await this.auth.iniciarSesion(this.modelo());
-      await this.router.navigateByUrl('/agenda');
+      await this.router.navigateByUrl('/inicio');
     } catch (fallo) {
       this.error.set(this.explicar(fallo));
     } finally {

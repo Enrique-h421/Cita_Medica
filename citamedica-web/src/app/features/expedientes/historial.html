@@ -30,7 +30,11 @@
   } @else {
     <ol class="linea-tiempo">
       @for (atencion of atenciones(); track atencion.atencionId) {
-        <li class="consulta" [class.consulta-anulada]="estaAnulada(atencion)">
+        <li
+          class="consulta"
+          [class.consulta-anulada]="estaAnulada(atencion)"
+          [class.consulta-abierta]="estaAbierta(atencion)"
+        >
           <header class="consulta-cabecera">
             <div>
               <span class="consulta-fecha">{{ fechaLarga(atencion.fechaInicio) }}</span>

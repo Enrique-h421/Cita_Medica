@@ -73,7 +73,7 @@
       </thead>
       <tbody>
         @for (paciente of visibles(); track paciente.pacienteId) {
-          <tr>
+          <tr [attr.data-acento]="paciente.activo ? 'exito' : 'neutro'">
             <td class="celda-codigo">{{ paciente.codigoPaciente }}</td>
 
             <td>

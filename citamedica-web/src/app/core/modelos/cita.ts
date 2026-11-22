@@ -74,3 +74,23 @@ export function sePuedeAtender(cita: Cita): boolean {
     cita.estadoCodigo !== ESTADO_CITA.noAsistio
   );
 }
+
+/**
+ * El color del filo que lleva la cita en la agenda y en el panel de inicio.
+ * Vive aquí y no en cada pantalla para que las dos pinten igual el mismo
+ * estado: si un día cambia, cambia en un solo sitio.
+ */
+export function acentoDeEstado(codigo: string): string {
+  switch (codigo) {
+    case ESTADO_CITA.atendida:
+      return 'exito';
+    case ESTADO_CITA.confirmada:
+      return 'info';
+    case ESTADO_CITA.pendiente:
+      return 'aviso';
+    case ESTADO_CITA.cancelada:
+      return 'error';
+    default:
+      return 'neutro';
+  }
+}

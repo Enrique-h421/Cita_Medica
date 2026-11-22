@@ -48,7 +48,7 @@
       </thead>
       <tbody>
         @for (expediente of expedientes(); track expediente.expedienteId) {
-          <tr>
+          <tr [attr.data-acento]="expediente.activo ? 'primario' : 'neutro'">
             <td class="celda-numero">{{ expediente.numeroExpediente }}</td>
 
             <td class="principal">

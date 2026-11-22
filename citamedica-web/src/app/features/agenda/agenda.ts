@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 
 import { Auth } from '../../core/auth/auth';
 import { Citas } from '../../core/servicios/citas';
-import { Cita, sePuedeAtender } from '../../core/modelos/cita';
+import { acentoDeEstado, Cita, sePuedeAtender } from '../../core/modelos/cita';
 import { fechaCorta, hora } from '../../core/fechas';
 
 /** Opción "todas" del filtro de estados. */
@@ -121,6 +121,11 @@ export class Agenda {
   }
 
   /** Clase CSS del distintivo según el estado, para el semáforo de colores. */
+  /** El color del filo de la fila. Sale del modelo, igual que en el inicio. */
+  protected acento(codigo: string): string {
+    return acentoDeEstado(codigo);
+  }
+
   protected claseEstado(codigo: string): string {
     switch (codigo) {
       case 'ATEN':

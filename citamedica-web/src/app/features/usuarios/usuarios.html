@@ -58,7 +58,7 @@
       </thead>
       <tbody>
         @for (usuario of usuarios(); track usuario.usuarioId) {
-          <tr>
+          <tr [attr.data-acento]="usuario.activo ? 'exito' : 'neutro'">
             <td class="celda-usuario">{{ usuario.nombreUsuario }}</td>
 
             <td>
@@ -88,11 +88,4 @@
       </tbody>
     </table>
   </div>
-
-  <p class="nota-seguridad">
-    Las contraseñas no se guardan en ningún lado: de cada usuario solo existe un
-    derivado criptográfico con sal propia, del que no se puede volver a la
-    contraseña original. Esta pantalla no las muestra porque el servidor
-    tampoco las conoce.
-  </p>
 }

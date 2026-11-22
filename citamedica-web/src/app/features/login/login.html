@@ -1,43 +1,101 @@
 <main class="pantalla">
-  <section class="tarjeta" aria-labelledby="titulo-login">
+  <!-- ======================= Panel de marca ======================= -->
+  <section class="panel-marca">
+    <!-- La retícula de agenda: líneas de hora con tres citas encima. Es
+         decoración, así que queda fuera del árbol de accesibilidad. -->
+    <div class="reticula" aria-hidden="true">
+      <div class="cita cita-1"></div>
+      <div class="cita cita-2"></div>
+      <div class="cita cita-3"></div>
+    </div>
+
     <header class="marca">
-      <div class="logo" aria-hidden="true">+</div>
-      <div>
-        <h1 id="titulo-login">CitaMedica</h1>
-        <p class="subtitulo">Sistema de gestión de citas médicas</p>
-      </div>
+      <svg class="logo" viewBox="0 0 76 76" width="34" height="34" aria-hidden="true">
+        <path d="M54.71 18.08 A 26 26 0 1 0 54.71 57.92"
+              fill="none" stroke="currentColor" stroke-width="11" stroke-linecap="round" />
+        <rect x="35.5" y="30" width="5" height="16" rx="2.5" fill="currentColor" />
+        <rect x="30" y="35.5" width="16" height="5" rx="2.5" fill="currentColor" />
+      </svg>
+      <span class="nombre-marca">CitaMedica</span>
     </header>
 
-    <form (submit)="$event.preventDefault(); entrar()">
-      <div class="campo">
-        <label for="usuario">Usuario</label>
-        <input
-          id="usuario"
-          type="text"
-          autocomplete="username"
-          autocapitalize="none"
-          spellcheck="false"
-          [formField]="formulario.nombreUsuario"
-        />
-      </div>
+    <div class="mensaje">
+      <h1>La consulta entera,<br />en un solo lugar.</h1>
+      <p>
+        Se agenda, se atiende y queda en el expediente. Sin cuadernos sueltos
+        ni fólderes que nadie encuentra.
+      </p>
+    </div>
+  </section>
 
-      <div class="campo">
-        <label for="clave">Contraseña</label>
-        <input
-          id="clave"
-          type="password"
-          autocomplete="current-password"
-          [formField]="formulario.password"
-        />
-      </div>
+  <!-- ======================= Panel de acceso ======================= -->
+  <section class="panel-acceso" aria-labelledby="titulo-login">
+    <div class="formulario">
+      <h2 id="titulo-login">Iniciar sesión</h2>
+      <p class="bajada">Ingrese con el usuario que le asignó la clínica.</p>
 
-      @if (error(); as mensaje) {
-        <p class="mensaje-error" role="alert">{{ mensaje }}</p>
-      }
+      <form (submit)="$event.preventDefault(); entrar()">
+        <div class="campo">
+          <label for="usuario">Usuario</label>
+          <input
+            id="usuario"
+            type="text"
+            autocomplete="username"
+            autocapitalize="none"
+            spellcheck="false"
+            [formField]="formulario.nombreUsuario"
+          />
+        </div>
 
-      <button type="submit" class="boton-primario boton-ancho" [disabled]="!puedeEntrar()">
-        {{ enviando() ? 'Entrando…' : 'Entrar' }}
-      </button>
-    </form>
+        <div class="campo">
+          <label for="clave">Contraseña</label>
+
+          <div class="campo-con-boton">
+            <input
+              id="clave"
+              [type]="mostrarClave() ? 'text' : 'password'"
+              autocomplete="current-password"
+              [formField]="formulario.password"
+            />
+
+            <button
+              type="button"
+              class="ver-clave"
+              [attr.aria-label]="mostrarClave() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              [attr.aria-pressed]="mostrarClave()"
+              (click)="alternarClave()"
+            >
+              @if (mostrarClave()) {
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                     stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 3l18 18" />
+                  <path d="M10.6 10.6a2 2 0 002.8 2.8" />
+                  <path d="M9.4 5.2A9.5 9.5 0 0112 5c5 0 9 4.5 9 7a11 11 0 01-2.6 3.4" />
+                  <path d="M6.2 6.6C3.9 8.1 3 10.4 3 12c0 2.5 4 7 9 7a9.3 9.3 0 004-.9" />
+                </svg>
+              } @else {
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                     stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 12c0-2.5 4-7 9-7s9 4.5 9 7-4 7-9 7-9-4.5-9-7z" />
+                  <circle cx="12" cy="12" r="2.6" />
+                </svg>
+              }
+            </button>
+          </div>
+        </div>
+
+        @if (error(); as mensaje) {
+          <p class="mensaje-error" role="alert">{{ mensaje }}</p>
+        }
+
+        <button type="submit" class="boton-primario boton-entrar" [disabled]="!puedeEntrar()">
+          {{ enviando() ? 'Entrando…' : 'Entrar' }}
+        </button>
+      </form>
+
+      <p class="pie">
+        ¿No puede entrar? Las cuentas las administra la dirección de la clínica.
+      </p>
+    </div>
   </section>
 </main>
